@@ -6,6 +6,10 @@
 	objectVersion = 77;
 	objects = {
 
+/* Begin PBXBuildFile section */
+		E269D59C2F4DA00C0038535A /* JitsuGame in Frameworks */ = {isa = PBXBuildFile; productRef = E269D59B2F4DA00C0038535A /* JitsuGame */; };
+/* End PBXBuildFile section */
+
 /* Begin PBXContainerItemProxy section */
 		E2FB8FC62F4D0BAE00E3D56D /* PBXContainerItemProxy */ = {
 			isa = PBXContainerItemProxy;
@@ -34,6 +38,7 @@
 			isa = PBXFileSystemSynchronizedBuildFileExceptionSet;
 			membershipExceptions = (
 				JitsuCore,
+				JitsuGame,
 				JitsuMatch,
 			);
 			target = E2FB8FB72F4D0BAD00E3D56D /* GaryJitsu */;
@@ -71,6 +76,7 @@
 			isa = PBXFrameworksBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
+				E269D59C2F4DA00C0038535A /* JitsuGame in Frameworks */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -91,6 +97,13 @@
 /* End PBXFrameworksBuildPhase section */
 
 /* Begin PBXGroup section */
+		E269D59A2F4DA00C0038535A /* Frameworks */ = {
+			isa = PBXGroup;
+			children = (
+			);
+			name = Frameworks;
+			sourceTree = "<group>";
+		};
 		E2FB8FAF2F4D0BAD00E3D56D = {
 			isa = PBXGroup;
 			children = (
@@ -98,6 +111,7 @@
 				E2FB8FE62F4D0C2A00E3D56D /* Packages */,
 				E2FB8FC82F4D0BAE00E3D56D /* GaryJitsuTests */,
 				E2FB8FD22F4D0BAE00E3D56D /* GaryJitsuUITests */,
+				E269D59A2F4DA00C0038535A /* Frameworks */,
 				E2FB8FB92F4D0BAD00E3D56D /* Products */,
 			);
 			sourceTree = "<group>";
@@ -133,6 +147,7 @@
 			);
 			name = GaryJitsu;
 			packageProductDependencies = (
+				E269D59B2F4DA00C0038535A /* JitsuGame */,
 			);
 			productName = GaryJitsu;
 			productReference = E2FB8FB82F4D0BAD00E3D56D /* GaryJitsu.app */;
@@ -425,7 +440,7 @@
 				INFOPLIST_KEY_UIApplicationSceneManifest_Generation = YES;
 				INFOPLIST_KEY_UIApplicationSupportsIndirectInputEvents = YES;
 				INFOPLIST_KEY_UILaunchScreen_Generation = YES;
-				INFOPLIST_KEY_UISupportedInterfaceOrientations = UIInterfaceOrientationPortrait;
+				INFOPLIST_KEY_UISupportedInterfaceOrientations = UIInterfaceOrientationLandscapeLeft;
 				INFOPLIST_KEY_UISupportedInterfaceOrientations_iPad = "UIInterfaceOrientationLandscapeLeft UIInterfaceOrientationLandscapeRight UIInterfaceOrientationPortrait UIInterfaceOrientationPortraitUpsideDown";
 				LD_RUNPATH_SEARCH_PATHS = (
 					"$(inherited)",
@@ -462,7 +477,7 @@
 				INFOPLIST_KEY_UIApplicationSceneManifest_Generation = YES;
 				INFOPLIST_KEY_UIApplicationSupportsIndirectInputEvents = YES;
 				INFOPLIST_KEY_UILaunchScreen_Generation = YES;
-				INFOPLIST_KEY_UISupportedInterfaceOrientations = UIInterfaceOrientationPortrait;
+				INFOPLIST_KEY_UISupportedInterfaceOrientations = UIInterfaceOrientationLandscapeLeft;
 				INFOPLIST_KEY_UISupportedInterfaceOrientations_iPad = "UIInterfaceOrientationLandscapeLeft UIInterfaceOrientationLandscapeRight UIInterfaceOrientationPortrait UIInterfaceOrientationPortraitUpsideDown";
 				LD_RUNPATH_SEARCH_PATHS = (
 					"$(inherited)",
@@ -609,6 +624,13 @@
 			defaultConfigurationName = Release;
 		};
 /* End XCConfigurationList section */
+
+/* Begin XCSwiftPackageProductDependency section */
+		E269D59B2F4DA00C0038535A /* JitsuGame */ = {
+			isa = XCSwiftPackageProductDependency;
+			productName = JitsuGame;
+		};
+/* End XCSwiftPackageProductDependency section */
 	};
 	rootObject = E2FB8FB02F4D0BAD00E3D56D /* Project object */;
 }

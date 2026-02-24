@@ -11,7 +11,7 @@ import SwiftUI
 struct GaryJitsuApp: App {
     var body: some Scene {
         WindowGroup {
-            ContentView()
+            LocalGameRootView()
         }
     }
 }
