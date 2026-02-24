@@ -34,6 +34,7 @@
 			isa = PBXFileSystemSynchronizedBuildFileExceptionSet;
 			membershipExceptions = (
 				JitsuCore,
+				JitsuMatch,
 			);
 			target = E2FB8FB72F4D0BAD00E3D56D /* GaryJitsu */;
 		};
