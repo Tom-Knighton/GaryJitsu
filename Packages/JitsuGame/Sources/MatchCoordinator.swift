@@ -20,6 +20,7 @@ public final class MatchCoordinator {
     private var autoTask: Task<Void, Never>?
 
     public var state: GameState { session.state }
+    public var effects: [Effect] { session.lastEffects }
     
     public init(localPlayer: Player, session: Session) {
         self.localPlayer = localPlayer

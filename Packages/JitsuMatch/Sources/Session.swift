@@ -14,6 +14,7 @@ public final class Session {
     
     public private(set) var state: GameState
     public private(set) var lastAppliedSeq: UInt64 = 0
+    public private(set) var lastEffects: [Effect] = []
 
     private let endpoint: any TransportEndpoint
     private var listenTask: Task<Void, Never>?
@@ -58,5 +59,6 @@ public final class Session {
         
         let reduced = Engine.reduce(state: state, intent: env.intent)
         state = reduced.state
+        lastEffects = reduced.effects
     }
 }

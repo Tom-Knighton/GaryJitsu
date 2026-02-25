@@ -31,13 +31,13 @@ public struct GameView: View {
                     print("Selected Card")
                 }
                 
-                scene.render(state: coordinator.state)
+                scene.render(state: coordinator.state, effects: coordinator.effects)
             }
             .onDisappear {
                 coordinator.stop()
             }
             .onChange(of: coordinator.state) { _, newValue in
-                scene.render(state: newValue)
+                scene.render(state: newValue, effects: coordinator.effects)
             }
     }
 }
