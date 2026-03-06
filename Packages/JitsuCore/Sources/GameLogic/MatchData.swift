@@ -12,8 +12,9 @@ public struct MatchData: Hashable, Codable, Sendable {
     public let seed: UInt64
     public let initialHandSize: Int
     public let decks: [Player: [Card]]
+    public let playIntro: Bool
     
-    public init(players: [Player], seed: UInt64, initialHandSize: Int = 5, decks: [Player : [Card]]) {
+    public init(players: [Player], seed: UInt64, initialHandSize: Int = 5, decks: [Player : [Card]], playIntro: Bool = true) {
         precondition(players.count == Set(players).count, "players must be unique")
         precondition(initialHandSize > 0, "initialHandSize must be > 0")
         precondition(players.allSatisfy { decks[$0] != nil }, "missing deck for player")
@@ -21,5 +22,6 @@ public struct MatchData: Hashable, Codable, Sendable {
         self.seed = seed
         self.initialHandSize = initialHandSize
         self.decks = decks
+        self.playIntro = playIntro
     }
 }

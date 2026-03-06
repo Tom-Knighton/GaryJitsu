@@ -9,6 +9,7 @@ import SwiftUI
 import SpriteKit
 import Observation
 import JitsuCore
+import JitsuMatch
 
 public struct GameView: View {
     @Bindable private var coordinator: MatchCoordinator

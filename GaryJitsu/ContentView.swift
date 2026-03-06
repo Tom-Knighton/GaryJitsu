@@ -38,3 +38,7 @@ struct LocalGameRootView: View {
         }
     }
 }
+
+#Preview(traits: .landscapeLeft) {
+    LocalGameRootView()
+}

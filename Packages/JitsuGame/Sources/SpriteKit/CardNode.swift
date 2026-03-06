@@ -11,6 +11,7 @@ import JitsuCore
 public final class CardNode: SKNode {
     public let cardId: CardId
     public var isInBottomTray: Bool = false
+    public var isDealing: Bool = false
     
     private let rect: SKShapeNode
     private let stripe: SKShapeNode
@@ -69,13 +70,15 @@ public final class CardNode: SKNode {
     public func setSelected(_ value: Bool) {
         selected = value
         
+        rect.strokeColor = selected ? .systemYellow : .init(white: 0.25, alpha: 1.0)
+        rect.lineWidth = selected ? 3 : 2
+        
+        guard action(forKey: "dealing") == nil else { return }
+        
         let targetY: CGFloat = selected ? 18 : 0
         if position.y != targetY {
             run(.moveTo(y: targetY, duration: 0.08))
         }
-        
-        rect.strokeColor = selected ? .systemYellow : .init(white: 0.25, alpha: 1.0)
-        rect.lineWidth = selected ? 3 : 2
     }
     
     private func shortID(_ id: CardId) -> String {
