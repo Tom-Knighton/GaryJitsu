@@ -1,0 +1,23 @@
+{
+  "images" : [
+    {
+      "filename" : "timur-tagirov-dojo-2-scene-3.jpg",
+      "idiom" : "universal",
+      "scale" : "1x"
+    },
+    {
+      "filename" : "timur-tagirov-dojo-2-scene-3 1.jpg",
+      "idiom" : "universal",
+      "scale" : "2x"
+    },
+    {
+      "filename" : "timur-tagirov-dojo-2-scene-3 2.jpg",
+      "idiom" : "universal",
+      "scale" : "3x"
+    }
+  ],
+  "info" : {
+    "author" : "xcode",
+    "version" : 1
+  }
+}

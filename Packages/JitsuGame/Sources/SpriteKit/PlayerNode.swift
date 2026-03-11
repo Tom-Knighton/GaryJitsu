@@ -119,7 +119,7 @@ public final class PlayerNode: SKNode {
         sprite.xScale = abs(sprite.xScale) * (facingRight ? 1 : -1)
         sprite.color = color
         
-        sprite.drawBorder(color: UIColor(cgColor: color.cgColor), width: 1)
+//        sprite.drawBorder(color: UIColor(cgColor: color.cgColor), width: 1)
     }
     
     public func setReady(_ ready: Bool) {
@@ -156,71 +156,4 @@ public final class PlayerNode: SKNode {
     }
 }
 
-extension SKNode {
-    func drawBorder(color: UIColor, width: CGFloat) {
-        let shapeNode = SKShapeNode(rect: frame)
-        shapeNode.fillColor = .clear
-        shapeNode.strokeColor = color
-        shapeNode.lineWidth = width
-        addChild(shapeNode)
-    }
-}
 
-public final class FrameAnimator {
-    public struct Clip: Hashable {
-        public let atlasName: String
-        public let prefix: String
-        public let fps: Double
-        public let loops: Bool
-        
-        public init(atlasName: String, prefix: String, fps: Double, loops: Bool) {
-            self.atlasName = atlasName
-            self.prefix = prefix
-            self.fps = fps
-            self.loops = loops
-        }
-    }
-    
-    private var clip: Clip?
-    private var frames: [SKTexture] = []
-    private var frameIndex: Int = 0
-    private var accumulator: TimeInterval = 0
-    
-    public init() {}
-    
-    public func play(
-        _ clip: Clip,
-        frames: [SKTexture],
-        restartIfSame: Bool = false
-    ) {
-        if !restartIfSame, self.clip == clip { return }
-        self.clip = clip
-        self.frames = frames
-        self.frameIndex = 0
-        self.accumulator = 0
-    }
-    
-    public func update(dt: TimeInterval, applyTexture: (SKTexture) -> Void) {
-        guard let clip, !frames.isEmpty else { return }
-        
-        let clamped = min(dt, 1.0 / 15.0)
-        accumulator += clamped
-        
-        let step = 1.0 / clip.fps
-        while accumulator >= step {
-            accumulator -= step
-            frameIndex += 1
-            
-            if frameIndex >= frames.count {
-                if clip.loops {
-                    frameIndex = 0
-                } else {
-                    frameIndex = frames.count - 1
-                    break
-                }
-            }
-        }
-        
-        applyTexture(frames[frameIndex])
-    }
-}

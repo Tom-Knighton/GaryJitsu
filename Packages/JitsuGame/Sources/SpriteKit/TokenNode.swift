@@ -15,7 +15,7 @@ public final class TokenNode: SKNode {
     private let rect: SKShapeNode
     private let stripe: SKShapeNode
     private let label: SKLabelNode
-
+    
     public init(cardId: CardId, size: CGSize, color: UIColor, element: Element) {
         self.cardId = cardId
         
@@ -54,10 +54,4 @@ public final class TokenNode: SKNode {
     
     @available(*, unavailable)
     public required init?(coder: NSCoder) { nil }
-    
-    
-    private func shortID(_ id: CardId) -> String {
-        let s = String(describing: id.rawValue)
-        return String(s)
-    }
 }

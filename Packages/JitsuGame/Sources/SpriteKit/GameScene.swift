@@ -1,126 +1,209 @@
-//
-//  GameScene.swift
-//  JitsuGame
-//
-//  Created by Tom Knighton on 24/02/2026.
-//
 
 import SpriteKit
 import JitsuCore
+import JitsuMatch
 
 public final class GameScene: SKScene {
     
+    // MARK: - Public API
+    
     public var onSelectCard: ((CardId) -> Void)?
     
-    private var localPlayer: Player
+    // MARK: - Logical layout
+    
+    public enum Layout {
+        public static let logicalSize = CGSize(width: 960, height: 540)
+        
+        public static let baseTrayHeight: CGFloat = 140
+        public static let maxBottomMarginTrayExpansion: CGFloat = 84
+        
+        public static let arenaTopInset: CGFloat = 68
+        public static let arenaBottomInset: CGFloat = 156
+        
+        public static let playerHorizontalInset: CGFloat = 220
+        
+        public static let trayBottomInset: CGFloat = 10
+        
+        public static let bottomHandVerticalFactor: CGFloat = 0.52
+        
+        public static let opponentMiniRightInset: CGFloat = 22
+        public static let opponentMiniVerticalFactor: CGFloat = 0.62
+        
+        public static let tokenTopInset: CGFloat = 26
+        public static let tokenOuterInset: CGFloat = 24
+    }
+    
+    public struct Viewport: Equatable {
+        public let sceneSize: CGSize
+        public let logicalSize: CGSize
+        public let logicalFrame: CGRect
+        public let margins: EdgeInsets
+        
+        public struct EdgeInsets: Equatable {
+            public let top: CGFloat
+            public let left: CGFloat
+            public let bottom: CGFloat
+            public let right: CGFloat
+        }
+        
+        public init(sceneSize: CGSize, logicalSize: CGSize = Layout.logicalSize) {
+            self.sceneSize = sceneSize
+            self.logicalSize = logicalSize
+            
+            let extraWidth = max(0, sceneSize.width - logicalSize.width)
+            let extraHeight = max(0, sceneSize.height - logicalSize.height)
+            
+            let horizontalMargin = extraWidth * 0.5
+            
+            let logicalFrame = CGRect(
+                x: horizontalMargin,
+                y: extraHeight,
+                width: logicalSize.width,
+                height: logicalSize.height
+            )
+            
+            self.logicalFrame = logicalFrame
+            self.margins = EdgeInsets(
+                top: 0,
+                left: horizontalMargin,
+                bottom: extraHeight,
+                right: horizontalMargin
+            )
+        }
+    }
+    
+    // MARK: - Identity
+    
+    private let localPlayer: Player
+    
+    // MARK: - Viewport
+    
+    public private(set) var viewport: Viewport
+    
+    // MARK: - Render-loop state
     
     private var lastUpdateTime: TimeInterval = 0
+    private var lastRenderedHash: Int?
+    private var lastProcessedRevealSeq: UInt64 = 0
+    private var lastPlayersCache: [Player]?
     
     private var isAnimating: Bool = false
     private var pendingState: GameState?
     private var pendingEffects: [Effect] = []
-    private var lastProcessedRevealSeq: UInt64 = 0
-    private var opponentMiniById: [CardId: CardNode] = [:]
     
-    private let ui = SKNode()
-    private let bg = SKShapeNode()
+    private var hasMovedToView = false
+    private var shouldStartIntro = false
     
-    private var lastPlayersCache: [Player]?
+    // MARK: - Scene graph
     
-    // Arena
+    private let world = SKNode()
+    
+    private let backgroundRoot = SKNode()
+    private let backgroundImage = SKSpriteNode(imageNamed: "game_bg")
+    private let gameRoot = SKNode()
+    private let hudRoot = SKNode()
+    private let overlay = SKNode()
+    
+    // MARK: Background layers
+    
+    private let backgroundFill = SKShapeNode()
+    private let sideLeftBackdrop = SKShapeNode()
+    private let sideRightBackdrop = SKShapeNode()
+    private let bottomBackdrop = SKShapeNode()
+    
+    private var currentTrayRect: CGRect = .zero
+        
+    // MARK: Main scene content
+    
     private let arena = SKNode()
     private let leftPlayer = PlayerNode()
     private let rightPlayer = PlayerNode()
     
-    // Bottom Tray
     private let bottomTray = SKShapeNode()
-    private let bottomCards = SKNode()
-    private let opponentMiniCards = SKNode()
     
-    private var cardNodesById: [CardId: CardNode] = [:]
-    private var localSlotByCardId: [CardId: Int] = [:]
-    private var opponentSlotByCardId: [CardId: Int] = [:]
-    private var localReservedSlot: Int?
-    private var opponentReservedSlot: Int?
-    private var centeredLocalCardId: CardId?
-    private var centeredOpponentCardId: CardId?
+    // MARK: Sub-components
     
-    // Overlay
-    private let overlay = SKNode()
-    private let tokenStacks = SKNode()
-    private var tokenStackByPlayer: [Player: SKNode] = [:]
-    private var elementStacksByPlayer: [Player: [Element: SKNode]] = [:]
-    private var lastSelections: [Player: CardId?] = [:]
-    private var lastTokenCounts: [Player: Int] = [:]
+    private let handRenderer = HandRenderer()
+    private let tokenRenderer = TokenRenderer()
+    private var revealAnimator: RevealAnimator?
+    private var introAnimator: IntroAnimator?
     
-    private var revealingPair: (local: CardNode, opp: CardNode, localId: CardId, oppId: CardId)?
-    private var revealInFlight: Bool = false
-    private var introCompleted: Bool = false
-    private var introAnimating: Bool = false
-    private var dealingCards: Set<CardId> = []
+    // MARK: Player positions
+    private var leftPlayerRestPosition: CGPoint = .zero
+    private var rightPlayerRestPosition: CGPoint = .zero
     
-    private var lastRenderedHash: Int?
+    // MARK: - Init
     
-    private let localSlotCount = 5
-    private let localCardSize = CGSize(width: 76, height: 110)
-    private let localCardGap: CGFloat = 14
-    private let opponentCardSize = CGSize(width: 44, height: 64)
-    private let opponentCardGap: CGFloat = 8
-    
-    public init(localPlayer: Player) {
+    public init(size: CGSize, localPlayer: Player) {
         self.localPlayer = localPlayer
-        super.init(size: .init(width: 390, height: 844))
-        scaleMode = .resizeFill
+        self.viewport = Viewport(sceneSize: size)
+        
+        super.init(size: size)
+        
+        scaleMode = .aspectFit
+        anchorPoint = .zero
+        
+        revealAnimator = RevealAnimator(
+            handRenderer: handRenderer,
+            tokenRenderer: tokenRenderer,
+            overlay: overlay,
+            localPlayer: localPlayer
+        )
+        
+        introAnimator = IntroAnimator(
+            leftPlayer: leftPlayer,
+            rightPlayer: rightPlayer,
+            bottomCards: handRenderer.bottomCards,
+            opponentMiniCards: handRenderer.opponentMiniCards
+        )
+        
+        revealAnimator?.onCycleFinished = { [weak self] in
+            self?.finishAnimationCycle()
+        }
+        
+        handRenderer.onDealingComplete = { [weak self] _ in
+            guard let self, let next = self.pendingState else { return }
+            self.pendingState = nil
+            self.pendingEffects = []
+            self.apply(state: next)
+        }
     }
     
     @available(*, unavailable)
-    public required init?(coder: NSCoder) { nil }
+    public required init?(coder: NSCoder) {
+        nil
+    }
+    
+    // MARK: - Lifecycle
     
     public override func didMove(to view: SKView) {
         super.didMove(to: view)
+        
+        hasMovedToView = true
+        backgroundColor = .red
+        
+        addChild(world)
+        world.addChild(backgroundRoot)
+        world.addChild(gameRoot)
+        world.addChild(hudRoot)
+        world.addChild(overlay)
+        
+        setupBackground()
+        setupGameContent()
+        setupHud()
+        layoutUI()
+        
         Task { @MainActor in
             await leftPlayer.preload(anims: [.idleReady, .walk])
             await rightPlayer.preload(anims: [.idleReady, .walk])
         }
-        backgroundColor = .black
+    }
+    
+    public override func didChangeSize(_ oldSize: CGSize) {
+        super.didChangeSize(oldSize)
         
-        addChild(ui)
-        
-        // Background
-        bg.isAntialiased = true
-        bg.strokeColor = .clear
-        bg.fillColor = .init(white: 0.12, alpha: 1)
-        bg.zPosition = -10
-        ui.addChild(bg)
-        
-        // Arena
-        ui.addChild(arena)
-        arena.addChild(leftPlayer)
-        arena.addChild(rightPlayer)
-        
-        // Bottom Tray
-        bottomTray.isAntialiased = true
-        bottomTray.strokeColor = .init(white: 0.25, alpha: 1)
-        bottomTray.lineWidth = 2
-        bottomTray.fillColor = .init(white: 0.08, alpha: 0.95)
-        bottomTray.zPosition = 10
-        ui.addChild(bottomTray)
-        
-        bottomCards.zPosition = 11
-        ui.addChild(bottomCards)
-        
-        // Opponents
-        opponentMiniCards.zPosition = 11
-        ui.addChild(opponentMiniCards)
-        
-        leftPlayer.set(color: .yellow, facingRight: true)
-        rightPlayer.set(color: .green, facingRight: false)
-        
-        // Overlay
-        ui.addChild(tokenStacks)
-        ui.addChild(overlay)
-        tokenStacks.zPosition = 50
-        overlay.zPosition = 100
+        viewport = Viewport(sceneSize: size)
+        layoutUI()
     }
     
     public override func update(_ currentTime: TimeInterval) {
@@ -136,60 +219,23 @@ public final class GameScene: SKScene {
         rightPlayer.update(dt: dt)
     }
     
-    public override func didChangeSize(_ oldSize: CGSize) {
-        super.didChangeSize(oldSize)
-        
-        bg.path = CGPath(rect: CGRect(origin: .zero, size: size), transform: nil)
-        bg.position = .zero
-        
-        layoutUI()
-    }
-    
-    private func layoutUI() {
-        let w = size.width
-        let h = size.height
-        
-        let trayHeight = max(140, h * 0.22)
-        let trayRect = CGRect(x: 0, y: 0, width: w, height: trayHeight)
-        bottomTray.path = CGPath(rect: trayRect, transform: nil)
-        bottomTray.position = .zero
-        
-        // Arena sits above tray
-        let arenaPaddingAboveTray: CGFloat = 10
-        arena.position = CGPoint(x: w * 0.5, y: trayHeight + arenaPaddingAboveTray)
-        
-        // Horizontal spacing for fighters around center
-        leftPlayer.position = CGPoint(x: -w * 0.75, y: 10)
-        rightPlayer.position = CGPoint(x:  w * 0.75, y: arenaPaddingAboveTray)
-        
-        // --- Bottom tray content ---
-        // Local hand on far left
-        bottomCards.position = CGPoint(x: w * 0.28, y: trayHeight * 0.52)
-        
-        // Opponent mini hand on right edge of tray
-        opponentMiniCards.position = CGPoint(x: w - 18, y: trayHeight * 0.62)
-        
-        if let lastPlayers = lastPlayersCache {
-            ensureTokenStacks(players: lastPlayers, local: localPlayer)
-            positionTokenStacks(players: lastPlayers, local: localPlayer)
-        }
-    }
+    // MARK: - Public Render Entry Point
     
     public func render(state: GameState, effects: [Effect] = []) {
-        
         if lastRenderedHash == nil {
             apply(state: state)
-            beginIntroIfNeeded()
+            introAnimator?.beginIfNeeded()
+            return
         }
         
-        if isAnimating || !dealingCards.isEmpty {
+        if isAnimating || !handRenderer.dealingCards.isEmpty {
             pendingState = state
             pendingEffects = effects
             return
         }
         
-        let hv = state.hashValue
-        if lastRenderedHash == hv {
+        let hash = state.hashValue
+        if lastRenderedHash == hash {
             return
         }
         
@@ -198,527 +244,266 @@ public final class GameScene: SKScene {
             lastProcessedRevealSeq = state.globalSequence
             pendingState = state
             pendingEffects = effects
-            startRevealCycle(reveal: reveal, effects: effects)
+            isAnimating = true
+            revealAnimator?.startRevealCycle(reveal: reveal, effects: effects)
             return
         }
         
         apply(state: state)
     }
     
-    private func renderBottomHand(state: GameState, player: Player) {
-        let ids = state.handIds(player)
-        rebuildSlots(ids: ids, slotByCard: &localSlotByCardId, reservedSlot: &localReservedSlot, centeredCardId: centeredLocalCardId, slotCount: localSlotCount)
+    // MARK: - Setup
+    
+    private func setupBackground() {
+        backgroundRoot.zPosition = -100
+                
+        gameRoot.zPosition = 0
+        hudRoot.zPosition = 50
+        overlay.zPosition = 100
         
-        let current = Set(ids)
-        for (id, node) in cardNodesById where node.isInBottomTray && !current.contains(id) && id != centeredLocalCardId {
-            node.removeFromParent()
-            cardNodesById[id] = nil
+        backgroundImage.anchorPoint = CGPoint(x: 0.5, y: 0.5)
+        backgroundImage.zPosition = -10
+        backgroundRoot.addChild(backgroundImage)
+        
+        backgroundFill.strokeColor = .clear
+        backgroundFill.fillColor = SKColor(red: 1, green: 0.08, blue: 0.14, alpha: 1)
+        backgroundFill.zPosition = -20
+        
+        sideLeftBackdrop.strokeColor = .clear
+        sideLeftBackdrop.fillColor = SKColor(red: 0.08, green: 1, blue: 0.19, alpha: 0.5)
+        
+        sideRightBackdrop.strokeColor = .clear
+        sideRightBackdrop.fillColor = SKColor(red: 0.08, green: 1, blue: 0.19, alpha: 0.5)
+        
+        bottomBackdrop.strokeColor = .clear
+        bottomBackdrop.fillColor = SKColor(red: 1, green: 0.07, blue: 0.11, alpha: 1)
+        
+        backgroundRoot.addChild(backgroundFill)
+        backgroundRoot.addChild(sideLeftBackdrop)
+        backgroundRoot.addChild(sideRightBackdrop)
+        backgroundRoot.addChild(bottomBackdrop)
+    }
+    
+    private func setupGameContent() {
+        gameRoot.addChild(arena)
+        arena.addChild(leftPlayer)
+        arena.addChild(rightPlayer)
+        
+        leftPlayer.set(color: .yellow, facingRight: true)
+        rightPlayer.set(color: .green, facingRight: false)
+        
+        bottomTray.isAntialiased = true
+        bottomTray.strokeColor = SKColor(white: 1, alpha: 0.14)
+        bottomTray.lineWidth = 2
+        bottomTray.fillColor = SKColor(red: 0.05, green: 0.06, blue: 0.09, alpha: 0.94)
+        bottomTray.zPosition = 10
+        
+        gameRoot.addChild(bottomTray)
+        
+        handRenderer.bottomCards.zPosition = 11
+        handRenderer.opponentMiniCards.zPosition = 11
+        gameRoot.addChild(handRenderer.bottomCards)
+        gameRoot.addChild(handRenderer.opponentMiniCards)
+        
+        handRenderer.sceneNode = self
+    }
+    
+    private func setupHud() {
+        hudRoot.addChild(tokenRenderer.container)
+    }
+    
+    // MARK: - Layout
+    
+    private func layoutUI() {
+        let sceneBounds = CGRect(origin: .zero, size: size)
+        let logical = viewport.logicalFrame
+        
+        layoutBackground(sceneBounds: sceneBounds, logical: logical)
+        layoutArena(logical: logical)
+        layoutTray(logical: logical)
+        layoutHands(logical: logical)
+        layoutTokens(logical: logical)
+        
+        introAnimator?.updateLayout(
+            sceneBounds: CGRect(origin: .zero, size: size),
+            arenaPosition: arena.position,
+            leftFinalPosition: leftPlayerRestPosition,
+            rightFinalPosition: rightPlayerRestPosition
+        )
+    }
+    
+    private func layoutBackground(sceneBounds: CGRect, logical: CGRect) {
+        backgroundImage.position = CGPoint(x: sceneBounds.midX, y: sceneBounds.midY)
+        backgroundImage.size = sceneBounds.size
+        
+        backgroundFill.path = CGPath(rect: sceneBounds, transform: nil)
+        
+        if viewport.margins.left > 0 {
+            let leftRect = CGRect(
+                x: sceneBounds.minX,
+                y: sceneBounds.minY,
+                width: viewport.margins.left,
+                height: sceneBounds.height
+            )
+            sideLeftBackdrop.path = CGPath(rect: leftRect, transform: nil)
+            
+            let rightRect = CGRect(
+                x: logical.maxX,
+                y: sceneBounds.minY,
+                width: viewport.margins.right,
+                height: sceneBounds.height
+            )
+            sideRightBackdrop.path = CGPath(rect: rightRect, transform: nil)
+        } else {
+            sideLeftBackdrop.path = nil
+            sideRightBackdrop.path = nil
         }
         
-        let totalWidth = CGFloat(localSlotCount) * localCardSize.width + CGFloat(localSlotCount - 1) * localCardGap
-        let startX = -totalWidth / 2 + localCardSize.width / 2
-        let slotToId = Dictionary(uniqueKeysWithValues: localSlotByCardId.map { ($1, $0) })
-        
-        for i in 0..<localSlotCount {
-            guard let id = slotToId[i], id != centeredLocalCardId else { continue }
-            
-            let x = startX + CGFloat(i) * (localCardSize.width + localCardGap)
-            let pos = CGPoint(x: x, y: 0)
-            
-            let existingNode = cardNodesById[id]
-            let isNewNode = existingNode == nil
-            let node = existingNode ?? {
-                let n = CardNode(cardId: id, size: localCardSize, faceUp: true)
-                n.isInBottomTray = true
-                cardNodesById[id] = n
-                return n
-            }()
-                        
-            if localReservedSlot == i && !dealingCards.contains(id) {
-                let spawn = bottomCards.convert(CGPoint(x: size.width * 0.55, y: 0), from: self)
-                node.position = spawn
-                node.alpha = 0
-                
-                if node.parent == nil {
-                    bottomCards.addChild(node)
-                }
-                
-                dealingCards.insert(id)
-                
-                let animation = SKAction.group([.move(to: pos, duration: 0.25), .fadeIn(withDuration: 0.2)])
-                let cardId = id
-                let sequence = SKAction.sequence([
-                    animation,
-                    .run { [weak self] in
-                        guard let self else { return }
-                        self.dealingCards.remove(cardId)
-                        if self.dealingCards.isEmpty, let next = self.pendingState {
-                            self.pendingState = nil
-                            self.pendingEffects = []
-                            self.apply(state: next)
-                        }
-                    }
-                ])
-                node.run(sequence, withKey: "dealing")
-                
-                localReservedSlot = nil
-            } else if dealingCards.contains(id) {
-                print("DEBUG renderLoop: BRANCH=SKIP_DEALING for \(id.rawValue)")
-            } else {
-                if node.parent == nil {
-                    bottomCards.addChild(node)
-                }
-                
-                if isNewNode || node.position == .zero {
-                    node.position = pos
-                } else if node.position != pos {
-                    node.run(.move(to: pos, duration: 0.1))
-                }
-            }
+        if viewport.margins.bottom > 0 {
+            let bottomRect = CGRect(
+                x: logical.minX,
+                y: 0,
+                width: logical.width,
+                height: logical.minY
+            )
+            bottomBackdrop.path = CGPath(rect: bottomRect, transform: nil)
+        } else {
+            bottomBackdrop.path = nil
         }
     }
     
-    private func renderOpponentHand(state: GameState, player: Player) {
-        let ids = state.handIds(player)
-        rebuildSlots(ids: ids, slotByCard: &opponentSlotByCardId, reservedSlot: &opponentReservedSlot, centeredCardId: centeredOpponentCardId, slotCount: localSlotCount)
+    private func layoutArena(logical: CGRect) {
+        let arenaMidY = logical.midY + 8
+        arena.position = CGPoint(x: logical.midX, y: arenaMidY)
         
-        let current = Set(ids)
-        for (id, node) in opponentMiniById where !node.isInBottomTray && !current.contains(id) && id != centeredOpponentCardId {
-            node.removeFromParent()
-            opponentMiniById[id] = nil
-        }
+        leftPlayerRestPosition = CGPoint(
+            x: -Layout.playerHorizontalInset,
+            y: -125
+        )
         
-        let totalWidth = CGFloat(localSlotCount) * opponentCardSize.width + CGFloat(localSlotCount - 1) * opponentCardGap
-        let startX = -totalWidth / 2 + opponentCardSize.width / 2
-        let slotToId = Dictionary(uniqueKeysWithValues: opponentSlotByCardId.map { ($1, $0) })
+        rightPlayerRestPosition = CGPoint(
+            x: Layout.playerHorizontalInset,
+            y: -125
+        )
         
-        for i in 0..<localSlotCount {
-            guard let id = slotToId[i], id != centeredOpponentCardId else { continue }
-            
-            let x = startX - CGFloat(i) * (opponentCardSize.width + opponentCardGap)
-            let pos = CGPoint(x: x, y: 0)
-            
-            let node = opponentMiniById[id] ?? {
-                let n = CardNode(cardId: id, size: opponentCardSize, faceUp: false)
-                n.isInBottomTray = false
-                opponentMiniById[id] = n
-                opponentMiniCards.addChild(n)
-                return n
-            }()
-            if node.parent == nil { opponentMiniCards.addChild(node) }
-            
-            if opponentReservedSlot == i {
-                let spawn = opponentMiniCards.convert(CGPoint(x: size.width * 0.55, y: size.height + 1.7), from: self)
-                node.position = spawn
-                node.alpha = 0
-                node.run(.group([.move(to: pos, duration: 1.25), .fadeIn(withDuration: 0.2)]))
-                opponentReservedSlot = nil
-            } else if node.position == .zero {
-                node.position = pos
-            } else {
-                node.run(.move(to: pos, duration: 0.1))
-            }
-        }
-    }
-   
-    private func ensureTokenStacks(players: [Player], local: Player) {
-        guard tokenStackByPlayer.isEmpty else { return }
-        
-        guard let opp = players.first(where: { $0 != local }) else { return }
-        
-        let left = SKNode()
-        let right = SKNode()
-        
-        tokenStacks.addChild(left)
-        tokenStacks.addChild(right)
-        
-        tokenStackByPlayer[local] = left
-        tokenStackByPlayer[opp] = right
-        
-        for player in [local, opp] {
-            guard let parentStack = tokenStackByPlayer[player] else { continue }
-            var elementStacks: [Element: SKNode] = [:]
-            
-            for element in Element.allCases {
-                let elementStack = SKNode()
-                parentStack.addChild(elementStack)
-                elementStacks[element] = elementStack
-            }
-            
-            elementStacksByPlayer[player] = elementStacks
+        let introStarted = introAnimator?.hasStartedOrCompleted ?? false
+        if !introStarted {
+            leftPlayer.position = leftPlayerRestPosition
+            rightPlayer.position = rightPlayerRestPosition
         }
     }
     
-    private func positionTokenStacks(players: [Player], local: Player) {
-        guard let opp = players.first(where: { $0 != local }) else { return }
-        guard
-            let localStack = tokenStackByPlayer[local],
-            let oppStack = tokenStackByPlayer[opp]
-        else { return }
+    private func layoutTray(logical: CGRect) {
+        let trayExpansion = min(
+            viewport.margins.bottom,
+            Layout.maxBottomMarginTrayExpansion
+        )
         
-        let trayHeight = max(140, size.height * 0.22)
-        let stackY = trayHeight + (size.height - trayHeight) * 0.90
+        let trayHeight = Layout.baseTrayHeight + trayExpansion
         
-        localStack.position = CGPoint(x: -50, y: stackY)
-        oppStack.position = CGPoint(x: size.width + 50, y: stackY)
+        let trayRect = CGRect(
+            x: logical.minX,
+            y: logical.minY - (trayHeight - Layout.baseTrayHeight) + Layout.trayBottomInset,
+            width: logical.width,
+            height: trayHeight
+        )
         
-        let elementGap: CGFloat = 60  // gap between element stacks
-        let elements: [Element] = [.fire, .water, .snow]
+        currentTrayRect = trayRect
         
-        for player in [local, opp] {
-            guard let elementStacks = elementStacksByPlayer[player] else { continue }
-            let isLocal = (player == local)
+        bottomTray.path = CGPath(
+            roundedRect: trayRect,
+            cornerWidth: 22,
+            cornerHeight: 22,
+            transform: nil
+        )
+        bottomTray.position = .zero
+    }
+    
+    private func layoutHands(logical: CGRect) {
+        handRenderer.logicalFrame = logical
+        
+        let trayRect = currentTrayRect
+        guard !trayRect.isEmpty else { return }
+        
+        handRenderer.bottomCards.position = CGPoint(
+            x: trayRect.minX + trayRect.width * 0.30,
+            y: trayRect.minY + trayRect.height * 0.52
+        )
+        
+        handRenderer.opponentMiniCards.position = CGPoint(
+            x: trayRect.maxX - 22,
+            y: trayRect.minY + trayRect.height * 0.62
+        )
+    }
+    
+    private func layoutTokens(logical: CGRect) {
+        guard let players = lastPlayersCache else { return }
+        
+        tokenRenderer.ensureStacks(players: players, local: localPlayer)
+        
+        if players.count >= 2 {
+            let localX = max(
+                24,
+                logical.minX - max(0, viewport.margins.left * 0.5)
+            )
             
-            for (i, element) in elements.enumerated() {
-                guard let elementStack = elementStacks[element] else { continue }
-                let xOffset = isLocal ? CGFloat(i) * elementGap : -CGFloat(i) * elementGap
-                elementStack.position = CGPoint(x: xOffset, y: 0)
-            }
+            let remoteX = min(
+                size.width - 24,
+                logical.maxX + max(0, viewport.margins.right * 0.5)
+            )
+            
+            let y = logical.maxY - Layout.tokenTopInset
+            
+            tokenRenderer.positionStacks(
+                players: players,
+                local: localPlayer,
+                localPosition: CGPoint(x: localX, y: y),
+                remotePosition: CGPoint(x: remoteX, y: y)
+            )
+        } else {
+            tokenRenderer.positionStacks(
+                players: players,
+                local: localPlayer,
+                localPosition: CGPoint(
+                    x: logical.minX + Layout.tokenOuterInset,
+                    y: logical.maxY - Layout.tokenTopInset
+                ),
+                remotePosition: CGPoint(
+                    x: logical.maxX - Layout.tokenOuterInset,
+                    y: logical.maxY - Layout.tokenTopInset
+                )
+            )
         }
     }
     
-    private func renderSelections(state: GameState, local: Player, opponent: Player) {
-        let localSelected = state.selectedCardId(local)
-        let oppSelected = state.selectedCardId(opponent)
-        
-        for (id, node) in cardNodesById {
-            node.setSelected(id == localSelected)
-        }
-        
-        if let localSelected { moveLocalSelectionToCenter(cardId: localSelected) }
-        if let oppSelected { moveOpponentSelectionToCenter(cardId: oppSelected) }
-        
-        leftPlayer.setReady(localSelected != nil)
-        rightPlayer.setReady(oppSelected != nil)
-    }
+    // MARK: - Apply State
     
     private func apply(state: GameState) {
         let players = state.config.players
         guard let opponent = players.first(where: { $0 != localPlayer }) else { return }
         
-        renderBottomHand(state: state, player: localPlayer)
-        renderOpponentHand(state: state, player: opponent)
-        renderSelections(state: state, local: localPlayer, opponent: opponent)
+        handRenderer.renderBottomHand(state: state, player: localPlayer)
+        handRenderer.renderOpponentHand(state: state, player: opponent)
+        handRenderer.renderSelections(
+            state: state,
+            local: localPlayer,
+            opponent: opponent,
+            overlay: overlay,
+            leftPlayer: leftPlayer,
+            rightPlayer: rightPlayer
+        )
         
         lastPlayersCache = players
-        ensureTokenStacks(players: players, local: localPlayer)
-        positionTokenStacks(players: players, local: localPlayer)
-        
-        syncTokenStacksFromState(state: state, players: players)
+        layoutTokens(logical: viewport.logicalFrame)
+        tokenRenderer.syncFromState(state, players: players)
         
         lastRenderedHash = state.hashValue
     }
     
-    private func rebuildSlots(ids: [CardId], slotByCard: inout [CardId: Int], reservedSlot: inout Int?, centeredCardId: CardId?, slotCount: Int) {
-        let idSet = Set(ids)
-        slotByCard = slotByCard.filter { idSet.contains($0.key) || $0.key == centeredCardId }
-                
-        let occupied = Set(slotByCard.values)
-        var available = Array((0..<slotCount).filter { !occupied.contains($0) })
-        
-        
-        for id in ids where slotByCard[id] == nil {
-            if let reserved = reservedSlot, available.contains(reserved) {
-                slotByCard[id] = reserved
-                available.removeAll(where: { $0 == reserved })
-            } else if let first = available.first {
-                slotByCard[id] = first
-                available.removeFirst()
-            }
-        }
-    }
-    
-    private func beginIntroIfNeeded() {
-        guard !introCompleted, !introAnimating else { return }
-        introAnimating = true
-        
-        bottomCards.alpha = 0
-        opponentMiniCards.alpha = 0
-        
-        let leftFinal = leftPlayer.position
-        let rightFinal = rightPlayer.position
-        
-        leftPlayer.play(.walk)
-        rightPlayer.play(.walk)
-        leftPlayer.position = CGPoint(x: -size.width * 0.65, y: leftFinal.y)
-        rightPlayer.position = CGPoint(x: size.width * 0.65, y: rightFinal.y)
-        
-        let leftWalk = SKAction.move(to: leftFinal, duration: 5)
-        let rightWalk = SKAction.move(to: rightFinal, duration: 5)
-        leftWalk.timingMode = .easeOut
-        rightWalk.timingMode = .easeOut
-        
-        leftPlayer.run(leftWalk)
-        rightPlayer.run(.sequence([
-            rightWalk,
-            .run { [weak self] in
-                self?.leftPlayer.play(.idleReady)
-                self?.rightPlayer.play(.idleReady)
-            },
-            .wait(forDuration: 1.0),
-            .run { [weak self] in self?.flutterCardsIntoView() }
-        ]))
-    }
-    
-    private func flutterCardsIntoView() {
-        let nodes = bottomCards.children + opponentMiniCards.children
-        bottomCards.alpha = 1
-        opponentMiniCards.alpha = 1
-        
-        for node in nodes {
-            let target = node.position
-            node.position = CGPoint(x: target.x, y: target.y + 34)
-            node.alpha = 0
-            node.zRotation = 0.08
-            node.run(.group([
-                .move(to: target, duration: 0.24),
-                .fadeIn(withDuration: 0.2),
-                .rotate(toAngle: 0, duration: 0.24)
-            ]))
-        }
-        
-        introCompleted = true
-        introAnimating = false
-    }
-    
-    private func moveLocalSelectionToCenter(cardId: CardId) {
-        guard centeredLocalCardId != cardId, let node = cardNodesById[cardId] else { return }
-        centeredLocalCardId = cardId
-        localReservedSlot = localSlotByCardId[cardId]
-        
-        let start = node.parent?.convert(node.position, to: overlay) ?? bottomCards.convert(.zero, to: overlay)
-        node.removeFromParent()
-        overlay.addChild(node)
-        node.position = start
-        node.zPosition = 200
-        node.run(.move(to: localCenterTarget(), duration: 0.2))
-    }
-    
-    private func moveOpponentSelectionToCenter(cardId: CardId) {
-        guard centeredOpponentCardId != cardId, let node = opponentMiniById[cardId] else { return }
-        centeredOpponentCardId = cardId
-        opponentReservedSlot = opponentSlotByCardId[cardId]
-        
-        let start = node.parent?.convert(node.position, to: overlay) ?? opponentMiniCards.convert(CGPoint(x: -22, y: 0), to: overlay)
-        node.removeFromParent()
-        overlay.addChild(node)
-        node.position = start
-        node.zPosition = 200
-        node.run(.move(to: opponentCenterTarget(), duration: 0.2))
-    }
-    
-    private func localCenterTarget() -> CGPoint {
-        CGPoint(x: size.width * 0.5 - 90, y: size.height * 0.52)
-    }
-    
-    private func opponentCenterTarget() -> CGPoint {
-        CGPoint(x: size.width * 0.5 + 90, y: size.height * 0.52)
-    }
-    
-    public override func touchesEnded(_ touches: Set<UITouch>, with event: UIEvent?) {
-        guard let touch = touches.first else { return }
-        let p = touch.location(in: self)
-        
-        let hit = atPoint(p)
-        
-        if let card = hit.closestAncestor(of: CardNode.self), card.isInBottomTray {
-            onSelectCard?(card.cardId)
-        }
-    }
-}
-
-
-// MARK: Animations
-extension GameScene {
-    private func startRevealCycle(reveal: Effect, effects: [Effect]) {
-        guard let payload = effects.revealPayload else {
-            return
-        }
-        let (a, b, _) = payload
-        
-        let localRevealed = (a.player == localPlayer) ? a : b
-        let oppRevealed   = (a.player == localPlayer) ? b : a
-        
-        let award = effects.firstAwardToken
-                
-        isAnimating = true
-        revealInFlight = true
-        
-        let localNode = centeredLocalNode(for: localRevealed.card.id)
-        let oppNode = centeredOpponentNode(for: oppRevealed.card.id)
-        
-        localNode.setFaceUp(true)
-        oppNode.setFaceUp(false)
-        
-        revealingPair = (localNode, oppNode, localRevealed.card.id, oppRevealed.card.id)
-                
-        localNode.run(.move(to: localCenterTarget(), duration: 0.12))
-        oppNode.run(.sequence([
-            .move(to: opponentCenterTarget(), duration: 0.22),
-            flipToFaceUp(oppNode, duration: 0.22),
-            .wait(forDuration: 0.25),
-            .run { [weak self] in
-                self?.completeRevealAwardIfNeeded(award: award)
-            }
-        ]))
-    }
-    
-    private func centeredLocalNode(for id: CardId) -> CardNode {
-        if let node = cardNodesById[id] {
-            if node.parent !== overlay {
-                let start = node.parent?.convert(node.position, to: overlay) ?? bottomCards.convert(.zero, to: overlay)
-                node.removeFromParent()
-                overlay.addChild(node)
-                node.position = start
-            }
-            return node
-        }
-        
-        let node = CardNode(cardId: id, size: localCardSize, faceUp: true)
-        node.position = localCenterTarget()
-        overlay.addChild(node)
-        cardNodesById[id] = node
-        return node
-    }
-    
-    private func centeredOpponentNode(for id: CardId) -> CardNode {
-        if let node = opponentMiniById[id] {
-            if node.parent !== overlay {
-                let start = node.parent?.convert(node.position, to: overlay) ?? opponentMiniCards.convert(CGPoint(x: -22, y: 0), to: overlay)
-                node.removeFromParent()
-                overlay.addChild(node)
-                node.position = start
-            }
-            return node
-        }
-        
-        let node = CardNode(cardId: id, size: opponentCardSize, faceUp: false)
-        node.position = opponentCenterTarget()
-        overlay.addChild(node)
-        opponentMiniById[id] = node
-        return node
-    }
-    
-    private func syncTokenStacksFromState(state: GameState, players: [Player]) {
-        let cardOverlap: CGFloat = -20
-        
-        for p in players {
-            guard let elementStacks = elementStacksByPlayer[p] else { continue }
-            let awards = state.playerZone(p).tokens.awards
-            
-            var awardsByElement: [Element: [TokenAward]] = [:]
-            for element in Element.allCases {
-                awardsByElement[element] = awards.filter { $0.element == element }
-            }
-            
-            for (element, elementAwards) in awardsByElement {
-                guard let elementStack = elementStacks[element] else { continue }
-                let existing = Set(elementStack.children.compactMap { ($0 as? TokenNode)?.cardId })
-                
-                for (i, a) in elementAwards.enumerated() where !existing.contains(a.cardId) {
-                    let tokenSize = CGSize(width: 50, height: 50)
-                    let tokenColor = colorForElement(a.element)
-                    let node = TokenNode(cardId: a.cardId, size: tokenSize, color: tokenColor, element: a.element)
-                    node.position = CGPoint(x: 0, y: CGFloat(i) * cardOverlap)
-                    node.zPosition = CGFloat(i)
-                    elementStack.addChild(node)
-                }
-            }
-        }
-    }
-    
-    
-    private func completeRevealAwardIfNeeded(award: (player: Player, award: TokenAward)?) {
-        guard let pair = revealingPair else {
-            finishAnimationCycle()
-            return
-        }
-        
-        cardNodesById[pair.localId] = nil
-        opponentMiniById[pair.oppId] = nil
-        
-        guard let award else {
-            let fade = SKAction.fadeOut(withDuration: 0.18)
-            pair.local.run(fade)
-            pair.opp.run(.sequence([fade, .removeFromParent()])) { [weak self] in
-                pair.local.removeFromParent()
-                self?.revealingPair = nil
-                self?.finishAnimationCycle()
-            }
-            return
-        }
-        
-        let winningNode: CardNode =
-        (award.award.cardId == pair.localId) ? pair.local : pair.opp
-        
-        let losingNode: CardNode =
-        (winningNode === pair.local) ? pair.opp : pair.local
-        
-        losingNode.run(.sequence([.fadeOut(withDuration: 0.18), .removeFromParent()]))
-        
-        guard let elementStacks = elementStacksByPlayer[award.player],
-              let elementStack = elementStacks[award.award.element] else {
-            finishAnimationCycle()
-            return
-        }
-        
-        let cardOverlap: CGFloat = -20
-        let idx = elementStack.children.count
-        let localPos = CGPoint(x: 0, y: CGFloat(idx) * cardOverlap)
-        let target = elementStack.convert(localPos, to: overlay)
-        
-        let tokenSize = CGSize(width: 50, height: 50)
-        let tokenColor = colorForElement(award.award.element)
-        let tokenNode = TokenNode(
-            cardId: award.award.cardId,
-            size: tokenSize,
-            color: tokenColor,
-            element: award.award.element
-        )
-        tokenNode.position = winningNode.position
-        tokenNode.alpha = 0
-        tokenNode.setScale(2.0)
-        overlay.addChild(tokenNode)
-        
-        let cardShrinkFade = SKAction.group([
-            .scale(to: 0.3, duration: 0.2),
-            .fadeOut(withDuration: 0.2)
-        ])
-        
-        winningNode.run(.sequence([cardShrinkFade, .removeFromParent()]))
-        
-        tokenNode.run(.sequence([
-            .group([
-                .fadeIn(withDuration: 0.15),
-                .scale(to: 1.0, duration: 0.25),
-                .move(to: target, duration: 0.3)
-            ]),
-            .run { [weak self] in
-                guard let self else { return }
-                tokenNode.removeFromParent()
-                tokenNode.position = localPos
-                tokenNode.zPosition = CGFloat(idx)
-                elementStack.addChild(tokenNode)
-                
-                self.revealingPair = nil
-                self.finishAnimationCycle()
-            }
-        ]))
-    }
-    
-    private func colorForElement(_ element: Element) -> UIColor {
-        switch element {
-        case .fire:  return UIColor(red: 0.9, green: 0.3, blue: 0.2, alpha: 1.0)
-        case .water: return UIColor(red: 0.2, green: 0.5, blue: 0.9, alpha: 1.0)
-        case .snow:  return UIColor(red: 0.85, green: 0.9, blue: 1.0, alpha: 1.0)
-        }
-    }
+    // MARK: - Animation Cycle End
     
     private func finishAnimationCycle() {
         isAnimating = false
-        revealInFlight = false
-        centeredLocalCardId = nil
-        centeredOpponentCardId = nil
         
         if let next = pendingState {
             pendingState = nil
@@ -727,46 +512,16 @@ extension GameScene {
         }
     }
     
+    // MARK: - Touch Handling
     
-    private func flipToFaceUp(_ node: CardNode, duration: TimeInterval) -> SKAction {
-        let half = duration / 2
-        let shrink = SKAction.scaleX(to: 0.05, duration: half)
-        shrink.timingMode = .easeIn
+    public override func touchesEnded(_ touches: Set<UITouch>, with event: UIEvent?) {
+        guard let touch = touches.first else { return }
         
-        let swap = SKAction.run { node.setFaceUp(true) }
+        let location = touch.location(in: self)
+        let hit = atPoint(location)
         
-        let expand = SKAction.scaleX(to: 1.0, duration: half)
-        expand.timingMode = .easeOut
-        
-        return .sequence([shrink, swap, expand])
-    }
-}
-
-private extension SKNode {
-    func closestAncestor<T: SKNode>(of _: T.Type) -> T? {
-        var n: SKNode? = self
-        while let current = n {
-            if let t = current as? T { return t }
-            n = current.parent
+        if let card = hit.closestAncestor(of: CardNode.self), card.isInBottomTray {
+            onSelectCard?(card.cardId)
         }
-        return nil
-    }
-}
-
-private extension Array where Element == Effect {
-    var firstRevealCards: Effect? {
-        first { if case .revealCards = $0 { return true } else { return false } }
-    }
-    var firstAwardToken: (player: Player, award: TokenAward)? {
-        for e in self {
-            if case let .awardToken(p, a) = e { return (p, a) }
-        }
-        return nil
-    }
-    var revealPayload: (a: RevealedCard, b: RevealedCard, outcomeForA: CardComparisonResult)? {
-        for e in self {
-            if case let .revealCards(a, b, outcome) = e { return (a, b, outcome) }
-        }
-        return nil
     }
 }

@@ -13,15 +13,38 @@ public final class CardNode: SKNode {
     public var isInBottomTray: Bool = false
     public var isDealing: Bool = false
     
-    private let rect: SKShapeNode
-    private let stripe: SKShapeNode
-    private let label: SKLabelNode
+    private var rect: SKShapeNode
+    private var stripe: SKShapeNode
+    private var label: SKLabelNode
     
     private var faceUp: Bool = true
     private var selected: Bool = false
     
-    public init(cardId: CardId, size: CGSize, faceUp: Bool) {
+    public enum CardType {
+        case faceDownSmall
+        case faceDownLarge
+        case faceUpSmall
+        case faceUpLarge
+        
+        var isFaceUp: Bool {
+            self == .faceUpSmall || self == .faceUpLarge
+        }
+        
+        var size: CGSize {
+            switch self {
+            case .faceUpLarge, .faceDownLarge:
+                CGSize(width: 76, height: 110)
+            case .faceDownSmall, .faceUpSmall:
+                CGSize(width: 44, height: 64)
+            }
+        }
+    }
+    
+    
+    public init(cardId: CardId, cardType: CardType) {
         self.cardId = cardId
+
+        let size = cardType.size
         
         rect = SKShapeNode(rectOf: size, cornerRadius: 10)
         stripe = SKShapeNode(rectOf: CGSize(width: size.width * 0.9, height: 10), cornerRadius: 4)
@@ -44,7 +67,7 @@ public final class CardNode: SKNode {
         addChild(stripe)
         addChild(label)
         
-        setFaceUp(faceUp)
+        setFaceUp(cardType.isFaceUp)
         setSelected(false)
     }
     
@@ -58,7 +81,7 @@ public final class CardNode: SKNode {
             rect.fillColor = .init(white: 0.92, alpha: 1.0)
             stripe.fillColor = .init(white: 0.75, alpha: 1.0)
             label.fontColor = .black
-            label.text = shortID(cardId)
+            label.text = cardId.shortID
         } else {
             rect.fillColor = .init(white: 0.20, alpha: 1.0)
             stripe.fillColor = .init(white: 0.30, alpha: 1.0)
@@ -81,8 +104,29 @@ public final class CardNode: SKNode {
         }
     }
     
-    private func shortID(_ id: CardId) -> String {
-        let s = String(describing: id.rawValue)
-        return String(s)
+    public func setCardType(to cardType: CardType) {
+        let size = cardType.size
+        removeChildren(in: [rect, stripe, label])
+
+        rect = SKShapeNode(rectOf: size, cornerRadius: 10)
+        stripe = SKShapeNode(rectOf: CGSize(width: size.width * 0.9, height: 10), cornerRadius: 4)
+        label = SKLabelNode(fontNamed: "SF Pro")
+        
+        rect.lineWidth = 2
+        rect.strokeColor = .init(white: 0.25, alpha: 1.0)
+        
+        stripe.lineWidth = 0
+        
+        label.fontSize = 10
+        label.verticalAlignmentMode = .center
+        label.horizontalAlignmentMode = .center
+        
+        stripe.position = CGPoint(x: 0, y: -size.height * 0.18)
+        
+        addChild(rect)
+        addChild(stripe)
+        addChild(label)
+        
+        setFaceUp(cardType.isFaceUp)
     }
 }
