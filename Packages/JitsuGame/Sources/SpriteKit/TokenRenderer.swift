@@ -101,7 +101,7 @@ final class TokenRenderer {
                 
                 for (i, a) in elementAwards.enumerated() where !existing.contains(a.cardId) {
                     let tokenSize = CGSize(width: 50, height: 50)
-                    let tokenColor = colorForElement(a.element)
+                    let tokenColor = colour(for: a.colour)
                     let node = TokenNode(cardId: a.cardId, size: tokenSize, color: tokenColor, element: a.element)
                     node.position = CGPoint(x: 0, y: CGFloat(i) * cardOverlap)
                     node.zPosition = CGFloat(i)

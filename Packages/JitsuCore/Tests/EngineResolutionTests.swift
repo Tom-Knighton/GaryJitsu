@@ -75,8 +75,8 @@ func round_resolution_awards_token_to_winner_based_on_winning_card_element() {
     var z1 = s.playerZone(p1)
     var z2 = s.playerZone(p2)
     
-    z1.hand = [Card(id: "p1_fire", element: .fire, level: 1)]
-    z2.hand = [Card(id: "p2_snow", element: .snow, level: 10)]
+    z1.hand = [Card(id: "p1_fire", element: .fire, level: 1, colour: .red)]
+    z2.hand = [Card(id: "p2_snow", element: .snow, level: 10, colour: .red)]
     s.zones[p1] = z1
     s.zones[p2] = z2
     
@@ -87,7 +87,7 @@ func round_resolution_awards_token_to_winner_based_on_winning_card_element() {
     let p1Tokens = sAfter.playerZone(p1).tokens
     let p2Tokens = sAfter.playerZone(p2).tokens
     
-    #expect(p1Tokens.counts[.fire] == 1)
+    #expect(p1Tokens.counts[.init(stringLiteral: "fire_red")] == 1)
     #expect(p2Tokens.counts.isEmpty)
     
     // Effect should include awardToken for p1 with the winning card snapshot.
@@ -109,8 +109,8 @@ func round_resolution_tie_awards_no_token() {
     // Tie: same element, same power.
     var z1 = s.playerZone(p1)
     var z2 = s.playerZone(p2)
-    z1.hand = [Card(id: "p1_fire", element: .fire, level: 5)]
-    z2.hand = [Card(id: "p2_fire", element: .fire, level: 5)]
+    z1.hand = [Card(id: "p1_fire", element: .fire, level: 5, colour: .red)]
+    z2.hand = [Card(id: "p2_fire", element: .fire, level: 5, colour: .red)]
     s.zones[p1] = z1
     s.zones[p2] = z2
     

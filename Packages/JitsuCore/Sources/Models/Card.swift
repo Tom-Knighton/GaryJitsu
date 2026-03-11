@@ -19,11 +19,17 @@ public struct Card: Hashable, Codable, Sendable {
     public let element: Element
     public let level: Int
     public let artKey: String?
+    public let colour: Colour
     
-    public init(id: CardId, element: Element, level: Int, artKey: String? = nil) {
+    public enum Colour: String, Hashable, Codable, Sendable, CaseIterable {
+        case red, blue, yellow, green, orange, purple
+    }
+    
+    public init(id: CardId, element: Element, level: Int, colour: Colour, artKey: String? = nil) {
         self.id = id
         self.element = element
         self.level = level
         self.artKey = artKey
+        self.colour = colour
     }
 }

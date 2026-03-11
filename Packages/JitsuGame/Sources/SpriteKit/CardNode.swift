@@ -9,7 +9,7 @@ import SpriteKit
 import JitsuCore
 
 public final class CardNode: SKNode {
-    public let cardId: CardId
+    public let card: Card
     public var isInBottomTray: Bool = false
     public var isDealing: Bool = false
     
@@ -41,8 +41,8 @@ public final class CardNode: SKNode {
     }
     
     
-    public init(cardId: CardId, cardType: CardType) {
-        self.cardId = cardId
+    public init(card: Card, cardType: CardType) {
+        self.card = card
 
         let size = cardType.size
         
@@ -56,6 +56,7 @@ public final class CardNode: SKNode {
         rect.strokeColor = .init(white: 0.25, alpha: 1.0)
         
         stripe.lineWidth = 0
+        stripe.fillColor = colour(for: card.colour)
         
         label.fontSize = 10
         label.verticalAlignmentMode = .center
@@ -79,12 +80,12 @@ public final class CardNode: SKNode {
         
         if faceUp {
             rect.fillColor = .init(white: 0.92, alpha: 1.0)
-            stripe.fillColor = .init(white: 0.75, alpha: 1.0)
+            stripe.fillColor = colour(for: card.colour)
             label.fontColor = .black
-            label.text = cardId.shortID
+            label.text = card.id.shortID
         } else {
             rect.fillColor = .init(white: 0.20, alpha: 1.0)
-            stripe.fillColor = .init(white: 0.30, alpha: 1.0)
+            stripe.fillColor = colour(for: card.colour)
             label.fontColor = .init(white: 0.8, alpha: 1.0)
             label.text = " "
         }
@@ -110,6 +111,7 @@ public final class CardNode: SKNode {
 
         rect = SKShapeNode(rectOf: size, cornerRadius: 10)
         stripe = SKShapeNode(rectOf: CGSize(width: size.width * 0.9, height: 10), cornerRadius: 4)
+        stripe.strokeColor = colour(for: card.colour)
         label = SKLabelNode(fontNamed: "SF Pro")
         
         rect.lineWidth = 2

@@ -520,8 +520,8 @@ public final class GameScene: SKScene {
         let location = touch.location(in: self)
         let hit = atPoint(location)
         
-        if let card = hit.closestAncestor(of: CardNode.self), card.isInBottomTray {
-            onSelectCard?(card.cardId)
+        if let node = hit.closestAncestor(of: CardNode.self), node.isInBottomTray {
+            onSelectCard?(node.card.id)
         }
     }
 }

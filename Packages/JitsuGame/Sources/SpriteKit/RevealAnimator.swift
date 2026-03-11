@@ -42,8 +42,8 @@ final class RevealAnimator {
         
         revealInFlight = true
         
-        let localNode = handRenderer.centeredLocalNode(for: localRevealed.card.id, overlay: overlay)
-        let oppNode = handRenderer.centeredOpponentNode(for: oppRevealed.card.id, overlay: overlay)
+        let localNode = handRenderer.centeredLocalNode(for: localRevealed.card, overlay: overlay)
+        let oppNode = handRenderer.centeredOpponentNode(for: oppRevealed.card, overlay: overlay)
         
         localNode.setFaceUp(true)
         oppNode.setFaceUp(false)
@@ -102,11 +102,10 @@ final class RevealAnimator {
         let target = elementStack.convert(localPos, to: overlay)
         
         let tokenSize = CGSize(width: 50, height: 50)
-        let tokenColor = colorForElement(award.award.element)
         let tokenNode = TokenNode(
             cardId: award.award.cardId,
             size: tokenSize,
-            color: tokenColor,
+            color: colour(for: award.award.colour),
             element: award.award.element
         )
         tokenNode.position = winningNode.position

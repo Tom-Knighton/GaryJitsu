@@ -13,6 +13,7 @@ import Foundation
 public struct TokenAward: Hashable, Codable, Sendable {
     public let cardId: CardId
     public let element: Element
+    public let colour: Card.Colour
     public let level: Int
     public let artKey: String?
     public let awardedAtSequence: UInt64
@@ -23,5 +24,6 @@ public struct TokenAward: Hashable, Codable, Sendable {
         self.level = card.level
         self.artKey = card.artKey
         self.awardedAtSequence = awardedAtSequence
+        self.colour = card.colour
     }
 }

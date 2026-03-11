@@ -16,13 +16,14 @@ public enum TestSupport {
         var cards: [Card] = []
         cards.reserveCapacity(30)
         
-        let elements: [Element] = [.fire, .water, .snow]
+        let elements: [Element] = Array(Element.allCases)
+        let colours: [Card.Colour] = Array(Card.Colour.allCases)
         var n = 0
         
         for e in elements {
             for p in 1...10 {
                 n += 1
-                cards.append(Card(id: CardId("\(prefix)-\(e.rawValue)-\(n)"), element: e, level: p, artKey: "\(e.rawValue)_\(p)"))
+                cards.append(Card(id: CardId("\(prefix)-\(e.rawValue)-\(n)"), element: e, level: p, colour: colours.randomElement()!, artKey: "\(e.rawValue)_\(p)"))
             }
         }
         

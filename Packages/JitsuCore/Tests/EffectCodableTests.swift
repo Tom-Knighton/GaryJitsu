@@ -17,8 +17,8 @@ func effect_is_codable_round_trip() throws {
     encoder.outputFormatting = [.sortedKeys, .withoutEscapingSlashes]
     let decoder = JSONDecoder()
     
-    let cardA = Card(id: "a1", element: .fire, level: 3, artKey: "fire_3")
-    let cardB = Card(id: "b1", element: .snow, level: 9, artKey: "snow_9")
+    let cardA = Card(id: "a1", element: .fire, level: 3, colour: .red, artKey: "fire_3")
+    let cardB = Card(id: "b1", element: .snow, level: 9, colour: .red, artKey: "snow_9")
     
     let effect: Effect = .revealCards(
         a: .init(player: TestSupport.p1, card: cardA),

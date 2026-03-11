@@ -54,7 +54,9 @@ final class HandRenderer {
     // MARK: - Local Hand
     
     func renderBottomHand(state: GameState, player: Player) {
-        let ids = state.handIds(player)
+        let cards = state.hand(player)
+        let ids = cards.map(\.id)
+        let cardById = Dictionary(uniqueKeysWithValues: cards.map { ($0.id, $0) })
         rebuildSlots(ids: ids, slotByCard: &localSlotByCardId, reservedSlot: &localReservedSlot, centeredCardId: centeredLocalCardId, slotCount: slotCount)
         
         let current = Set(ids)
@@ -76,7 +78,7 @@ final class HandRenderer {
             let existingNode = cardNodesById[id]
             let isNewNode = existingNode == nil
             let node = existingNode ?? {
-                let n = CardNode(cardId: id, cardType: .faceUpLarge)
+                let n = CardNode(card: cardById[id]!, cardType: .faceUpLarge)
                 n.isInBottomTray = true
                 cardNodesById[id] = n
                 return n
@@ -133,7 +135,9 @@ final class HandRenderer {
     // MARK: - Opponent Hand
     
     func renderOpponentHand(state: GameState, player: Player) {
-        let ids = state.handIds(player)
+        let cards = state.hand(player)
+        let ids = cards.map(\.id)
+        let cardById = Dictionary(uniqueKeysWithValues: cards.map { ($0.id, $0) })
         rebuildSlots(ids: ids, slotByCard: &opponentSlotByCardId, reservedSlot: &opponentReservedSlot, centeredCardId: centeredOpponentCardId, slotCount: slotCount)
         
         let current = Set(ids)
@@ -153,7 +157,7 @@ final class HandRenderer {
             let pos = CGPoint(x: x, y: 0)
             
             let node = opponentMiniById[id] ?? {
-                let n = CardNode(cardId: id, cardType: .faceDownSmall)
+                let n = CardNode(card: cardById[id]!, cardType: .faceDownSmall)
                 n.isInBottomTray = false
                 opponentMiniById[id] = n
                 opponentMiniCards.addChild(n)
@@ -231,8 +235,8 @@ final class HandRenderer {
         node.run(.move(to: opponentCenterTarget(), duration: 0.2))
     }
     
-    func centeredLocalNode(for id: CardId, overlay: SKNode) -> CardNode {
-        if let node = cardNodesById[id] {
+    func centeredLocalNode(for card: Card, overlay: SKNode) -> CardNode {
+        if let node = cardNodesById[card.id] {
             if node.parent !== overlay {
                 let start = node.parent?.convert(node.position, to: overlay) ?? bottomCards.convert(.zero, to: overlay)
                 node.removeFromParent()
@@ -242,15 +246,15 @@ final class HandRenderer {
             return node
         }
         
-        let node = CardNode(cardId: id, cardType: .faceUpLarge)
+        let node = CardNode(card: card, cardType: .faceUpLarge)
         node.position = localCenterTarget()
         overlay.addChild(node)
-        cardNodesById[id] = node
+        cardNodesById[card.id] = node
         return node
     }
     
-    func centeredOpponentNode(for id: CardId, overlay: SKNode) -> CardNode {
-        if let node = opponentMiniById[id] {
+    func centeredOpponentNode(for card: Card, overlay: SKNode) -> CardNode {
+        if let node = opponentMiniById[card.id] {
             if node.parent !== overlay {
                 let start = node.parent?.convert(node.position, to: overlay) ?? opponentMiniCards.convert(CGPoint(x: -22, y: 0), to: overlay)
                 node.removeFromParent()
@@ -260,10 +264,10 @@ final class HandRenderer {
             return node
         }
         
-        let node = CardNode(cardId: id, cardType: .faceDownLarge)
+        let node = CardNode(card: card, cardType: .faceDownLarge)
         node.position = opponentCenterTarget()
         overlay.addChild(node)
-        opponentMiniById[id] = node
+        opponentMiniById[card.id] = node
         return node
     }
     
