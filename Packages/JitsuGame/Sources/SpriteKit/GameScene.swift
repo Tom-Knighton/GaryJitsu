@@ -29,8 +29,8 @@ public final class GameScene: SKScene {
         public static let opponentMiniRightInset: CGFloat = 22
         public static let opponentMiniVerticalFactor: CGFloat = 0.62
         
-        public static let tokenTopInset: CGFloat = 26
-        public static let tokenOuterInset: CGFloat = 24
+        public static let tokenTopInset: CGFloat = 50
+        public static let tokenOuterInset: CGFloat = 32
     }
     
     public struct Viewport: Equatable {
