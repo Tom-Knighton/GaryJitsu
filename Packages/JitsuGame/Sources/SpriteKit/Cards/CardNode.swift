@@ -13,6 +13,8 @@ public final class CardNode: SKNode {
     public var isInBottomTray: Bool = false
     public var isDealing: Bool = false
     
+    private var frameArt: SKSpriteNode
+    
     private var rect: SKShapeNode
     private var stripe: SKShapeNode
     private var label: SKLabelNode
@@ -44,32 +46,13 @@ public final class CardNode: SKNode {
     public init(card: Card, cardType: CardType) {
         self.card = card
 
-        let size = cardType.size
-        
-        rect = SKShapeNode(rectOf: size, cornerRadius: 10)
-        stripe = SKShapeNode(rectOf: CGSize(width: size.width * 0.9, height: 10), cornerRadius: 4)
+        rect = SKShapeNode(rectOf: cardType.size, cornerRadius: 10)
+        stripe = SKShapeNode(rectOf: CGSize(width: cardType.size.width * 0.9, height: 10), cornerRadius: 4)
         label = SKLabelNode(fontNamed: "SF Pro")
-        
+        frameArt = SKSpriteNode(texture: Self.template(for: card))
         super.init()
         
-        rect.lineWidth = 2
-        rect.strokeColor = .init(white: 0.25, alpha: 1.0)
-        
-        stripe.lineWidth = 0
-        stripe.fillColor = colour(for: card.colour)
-        
-        label.fontSize = 10
-        label.verticalAlignmentMode = .center
-        label.horizontalAlignmentMode = .center
-        
-        stripe.position = CGPoint(x: 0, y: -size.height * 0.18)
-        
-        addChild(rect)
-        addChild(stripe)
-        addChild(label)
-        
-        setFaceUp(cardType.isFaceUp)
-        setSelected(false)
+        drawAndAddBaseNodes(for: cardType)
     }
     
     @available(*, unavailable)
@@ -83,11 +66,13 @@ public final class CardNode: SKNode {
             stripe.fillColor = colour(for: card.colour)
             label.fontColor = .black
             label.text = card.id.shortID
+            frameArt.isHidden = false
         } else {
             rect.fillColor = .init(white: 0.20, alpha: 1.0)
             stripe.fillColor = colour(for: card.colour)
             label.fontColor = .init(white: 0.8, alpha: 1.0)
             label.text = " "
+            frameArt.isHidden = true
         }
     }
     
@@ -106,14 +91,15 @@ public final class CardNode: SKNode {
     }
     
     public func setCardType(to cardType: CardType) {
-        let size = cardType.size
         removeChildren(in: [rect, stripe, label])
-
-        rect = SKShapeNode(rectOf: size, cornerRadius: 10)
-        stripe = SKShapeNode(rectOf: CGSize(width: size.width * 0.9, height: 10), cornerRadius: 4)
-        stripe.strokeColor = colour(for: card.colour)
+        rect = SKShapeNode(rectOf: cardType.size, cornerRadius: 10)
+        stripe = SKShapeNode(rectOf: CGSize(width: cardType.size.width * 0.9, height: 10), cornerRadius: 4)
         label = SKLabelNode(fontNamed: "SF Pro")
-        
+        frameArt = SKSpriteNode(texture: Self.template(for: card))
+        self.drawAndAddBaseNodes(for: cardType)
+    }
+    
+    private func drawAndAddBaseNodes(for cardType: CardType) {
         rect.lineWidth = 2
         rect.strokeColor = .init(white: 0.25, alpha: 1.0)
         
@@ -123,12 +109,18 @@ public final class CardNode: SKNode {
         label.verticalAlignmentMode = .center
         label.horizontalAlignmentMode = .center
         
-        stripe.position = CGPoint(x: 0, y: -size.height * 0.18)
+        stripe.position = CGPoint(x: 0, y: -cardType.size.height * 0.18)
         
-        addChild(rect)
-        addChild(stripe)
+        if cardType.isFaceUp {
+            frameArt.anchorPoint = CGPoint(x: 0.5, y: 0.5)
+            frameArt.size = cardType.size
+            addChild(frameArt)
+        } else {
+            addChild(rect)
+            addChild(stripe)
+        }
+        
         addChild(label)
-        
         setFaceUp(cardType.isFaceUp)
     }
 }
