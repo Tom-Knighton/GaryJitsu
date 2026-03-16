@@ -23,7 +23,7 @@ public enum TestSupport {
         for e in elements {
             for p in 2...8 {
                 n += 1
-                cards.append(Card(id: CardId("\(prefix)-\(e.rawValue)-\(p)"), element: e, level: p, colour: colours.randomElement()!, artKey: "\(e.rawValue)_\(p)"))
+                cards.append(Card(id: CardId("\(prefix)-\(e.rawValue)-\(p)"), name: "Test1", element: e, level: p, colour: colours.randomElement()!, artKey: "\(e.rawValue)_\(p)"))
             }
         }
         

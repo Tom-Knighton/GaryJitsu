@@ -13,6 +13,7 @@ import JitsuMatch
 @Observable
 public final class MatchCoordinator {
     public let localPlayer: Player
+    public let matchData: MatchData
     public let session: Session
     public var autoOpponent: Bool = true
     
@@ -22,9 +23,10 @@ public final class MatchCoordinator {
     public var state: GameState { session.state }
     public var effects: [Effect] { session.lastEffects }
     
-    public init(localPlayer: Player, session: Session) {
+    public init(localPlayer: Player, matchData: MatchData, session: Session) {
         self.localPlayer = localPlayer
         self.session = session
+        self.matchData = matchData
     }
     
     func start() {
@@ -37,6 +39,8 @@ public final class MatchCoordinator {
     
     func selectCard(_ cardId: CardId) {
         session.submit(.selectCard(player: localPlayer, card: cardId))
+        
+        guard autoOpponent else { return }
         
         autoTask?.cancel()
         autoTask = Task { [weak self] in

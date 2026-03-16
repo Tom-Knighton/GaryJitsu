@@ -1,0 +1,42 @@
+{
+    "$schema": "http://json-schema.org/draft-07/schema#",
+    "type": "object",
+    "required": ["schemaVersion", "catalogVersion", "cards"],
+    "properties": {
+        "schemaVersion": {
+            "type": "integer"
+        },
+        "catalogVersion": {
+            "type": "string"
+        },
+        "cards": {
+            "type": "array",
+            "items": {
+                "type": "object",
+                "required": ["id", "name", "element", "level", "colour"],
+                "properties": {
+                    "id": { "type": "string" },
+                    "setId": { "type": "string" },
+                    "name": { "type": "string" },
+                    "description": { "type": ["string", "null"] },
+                    "element": {
+                        "type": "string",
+                        "enum": ["fire", "snow", "water"]
+                    },
+                    "level": {
+                        "type": "integer",
+                        "minimum": 2,
+                        "maximum": 12
+                    },
+                    "colour": {
+                        "type": "string",
+                        "enum": ["blue", "green", "orange", "purple", "red", "yellow"]
+                    },
+                    "artKey": {
+                        "type": ["string", "null"]
+                    }
+                }
+            }
+        }
+    }
+}
