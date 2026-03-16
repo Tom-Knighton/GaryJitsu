@@ -16,6 +16,8 @@ final class CardTextureStore: Sendable {
         case greenTemplate
         case purpleTemplate
         
+        case cardBack
+        
         case fireIcon
         case waterIcon
         case iceIcon

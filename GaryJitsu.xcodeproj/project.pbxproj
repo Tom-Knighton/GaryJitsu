@@ -34,6 +34,13 @@
 /* End PBXFileReference section */
 
 /* Begin PBXFileSystemSynchronizedBuildFileExceptionSet section */
+		E20FCDC12F6849AF00934BF8 /* Exceptions for "GaryJitsu" folder in "GaryJitsu" target */ = {
+			isa = PBXFileSystemSynchronizedBuildFileExceptionSet;
+			membershipExceptions = (
+				Info.plist,
+			);
+			target = E2FB8FB72F4D0BAD00E3D56D /* GaryJitsu */;
+		};
 		E2FB8FE82F4D0C3F00E3D56D /* Exceptions for "Packages" folder in "GaryJitsu" target */ = {
 			isa = PBXFileSystemSynchronizedBuildFileExceptionSet;
 			membershipExceptions = (
@@ -48,6 +55,9 @@
 /* Begin PBXFileSystemSynchronizedRootGroup section */
 		E2FB8FBA2F4D0BAD00E3D56D /* GaryJitsu */ = {
 			isa = PBXFileSystemSynchronizedRootGroup;
+			exceptions = (
+				E20FCDC12F6849AF00934BF8 /* Exceptions for "GaryJitsu" folder in "GaryJitsu" target */,
+			);
 			path = GaryJitsu;
 			sourceTree = "<group>";
 		};
@@ -436,6 +446,7 @@
 				DEVELOPMENT_TEAM = 8H3J46CN24;
 				ENABLE_PREVIEWS = YES;
 				GENERATE_INFOPLIST_FILE = YES;
+				INFOPLIST_FILE = GaryJitsu/Info.plist;
 				INFOPLIST_KEY_CFBundleDisplayName = GaryJitsu;
 				INFOPLIST_KEY_UIApplicationSceneManifest_Generation = YES;
 				INFOPLIST_KEY_UIApplicationSupportsIndirectInputEvents = YES;
@@ -473,6 +484,7 @@
 				DEVELOPMENT_TEAM = 8H3J46CN24;
 				ENABLE_PREVIEWS = YES;
 				GENERATE_INFOPLIST_FILE = YES;
+				INFOPLIST_FILE = GaryJitsu/Info.plist;
 				INFOPLIST_KEY_CFBundleDisplayName = GaryJitsu;
 				INFOPLIST_KEY_UIApplicationSceneManifest_Generation = YES;
 				INFOPLIST_KEY_UIApplicationSupportsIndirectInputEvents = YES;

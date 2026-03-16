@@ -15,12 +15,11 @@ public final class CardNode: SKNode {
     
     private var frameArt: SKSpriteNode
     
-    private var rect: SKShapeNode
-    private var stripe: SKShapeNode
-    private var label: SKLabelNode
-    
     private var faceUp: Bool = true
     private var selected: Bool = false
+    
+    private var elementIcon: SKSpriteNode
+    private var levelIcon: SKLabelNode
     
     public enum CardType {
         case faceDownSmall
@@ -46,10 +45,9 @@ public final class CardNode: SKNode {
     public init(card: Card, cardType: CardType) {
         self.card = card
 
-        rect = SKShapeNode(rectOf: cardType.size, cornerRadius: 10)
-        stripe = SKShapeNode(rectOf: CGSize(width: cardType.size.width * 0.9, height: 10), cornerRadius: 4)
-        label = SKLabelNode(fontNamed: "SF Pro")
-        frameArt = SKSpriteNode(texture: Self.template(for: card))
+        frameArt = SKSpriteNode()
+        elementIcon = SKSpriteNode(texture: Self.icon(for: card))
+        levelIcon = SKLabelNode()
         super.init()
         
         drawAndAddBaseNodes(for: cardType)
@@ -60,27 +58,10 @@ public final class CardNode: SKNode {
     
     public func setFaceUp(_ value: Bool) {
         faceUp = value
-        
-        if faceUp {
-            rect.fillColor = .init(white: 0.92, alpha: 1.0)
-            stripe.fillColor = colour(for: card.colour)
-            label.fontColor = .black
-            label.text = card.id.shortID
-            frameArt.isHidden = false
-        } else {
-            rect.fillColor = .init(white: 0.20, alpha: 1.0)
-            stripe.fillColor = colour(for: card.colour)
-            label.fontColor = .init(white: 0.8, alpha: 1.0)
-            label.text = " "
-            frameArt.isHidden = true
-        }
     }
     
     public func setSelected(_ value: Bool) {
         selected = value
-        
-        rect.strokeColor = selected ? .systemYellow : .init(white: 0.25, alpha: 1.0)
-        rect.lineWidth = selected ? 3 : 2
         
         guard action(forKey: "dealing") == nil else { return }
         
@@ -91,36 +72,41 @@ public final class CardNode: SKNode {
     }
     
     public func setCardType(to cardType: CardType) {
-        removeChildren(in: [rect, stripe, label])
-        rect = SKShapeNode(rectOf: cardType.size, cornerRadius: 10)
-        stripe = SKShapeNode(rectOf: CGSize(width: cardType.size.width * 0.9, height: 10), cornerRadius: 4)
-        label = SKLabelNode(fontNamed: "SF Pro")
+        removeChildren(in: [elementIcon, levelIcon, frameArt])
         frameArt = SKSpriteNode(texture: Self.template(for: card))
+        elementIcon = SKSpriteNode(texture: Self.icon(for: card))
+        levelIcon = SKLabelNode()
         self.drawAndAddBaseNodes(for: cardType)
     }
     
     private func drawAndAddBaseNodes(for cardType: CardType) {
-        rect.lineWidth = 2
-        rect.strokeColor = .init(white: 0.25, alpha: 1.0)
-        
-        stripe.lineWidth = 0
-        
-        label.fontSize = 10
-        label.verticalAlignmentMode = .center
-        label.horizontalAlignmentMode = .center
-        
-        stripe.position = CGPoint(x: 0, y: -cardType.size.height * 0.18)
-        
         if cardType.isFaceUp {
+            frameArt.texture = Self.template(for: card)
             frameArt.anchorPoint = CGPoint(x: 0.5, y: 0.5)
             frameArt.size = cardType.size
             addChild(frameArt)
+            
+            elementIcon.zPosition = 10
+            elementIcon.size = .init(width: 12.5, height: 17)
+            elementIcon.position = .init(x: cardType.size.width / 3.25, y: cardType.size.height / 3)
+            addChild(elementIcon)
+            
+            levelIcon.zPosition = 10
+            levelIcon.text = "\(card.level)"
+            levelIcon.fontName = "Kaph-Regular"
+            levelIcon.fontSize = 14
+            levelIcon.fontColor = .black
+            levelIcon.fontColor?.setStroke()
+            levelIcon.position = .init(x: cardType.size.width / 3.25, y: cardType.size.height / 25)
+            levelIcon.addStroke(color: .white, width: 5)
+            addChild(levelIcon)
         } else {
-            addChild(rect)
-            addChild(stripe)
+            frameArt.texture = CardTextureStore.shared.ui(.cardBack)
+            frameArt.anchorPoint = CGPoint(x: 0.5, y: 0.5)
+            frameArt.size = cardType.size
+            addChild(frameArt)
         }
         
-        addChild(label)
         setFaceUp(cardType.isFaceUp)
     }
 }

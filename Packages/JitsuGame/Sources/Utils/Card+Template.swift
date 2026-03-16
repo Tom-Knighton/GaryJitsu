@@ -25,4 +25,15 @@ public extension CardNode {
             return CardTextureStore.shared.ui(.purpleTemplate)
         }
     }
+    
+    static func icon(for card: Card) -> SKTexture {
+        switch card.element {
+        case .fire:
+            return CardTextureStore.shared.ui(.fireIcon)
+        case .snow:
+            return CardTextureStore.shared.ui(.iceIcon)
+        case .water:
+            return CardTextureStore.shared.ui(.waterIcon)
+        }
+    }
 }
