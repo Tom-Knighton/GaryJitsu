@@ -12,17 +12,17 @@ public extension CardNode {
     static func template(for card: Card) -> SKTexture {
         switch card.colour {
         case .blue:
-            return CardTextureStore.shared.ui(.blueTemplate)
+            return CardTextureStore.shared.ui(.templateBlue)
         case .red:
-            return CardTextureStore.shared.ui(.redTemplate)
+            return CardTextureStore.shared.ui(.templateRed)
         case .yellow:
-            return CardTextureStore.shared.ui(.yellowTemplate)
+            return CardTextureStore.shared.ui(.templateYellow)
         case .green:
-            return CardTextureStore.shared.ui(.greenTemplate)
+            return CardTextureStore.shared.ui(.templateGreen)
         case .orange:
-            return CardTextureStore.shared.ui(.orangeTemplate)
+            return CardTextureStore.shared.ui(.templateOrange)
         case .purple:
-            return CardTextureStore.shared.ui(.purpleTemplate)
+            return CardTextureStore.shared.ui(.templatePurple)
         }
     }
     

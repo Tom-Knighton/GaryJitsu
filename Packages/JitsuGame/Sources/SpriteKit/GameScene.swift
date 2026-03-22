@@ -93,6 +93,7 @@ public final class GameScene: SKScene {
     
     private var hasMovedToView = false
     private var shouldStartIntro = false
+    private var hasLoadedCardTextures = false
     
     // MARK: - Scene graph
     
@@ -480,7 +481,14 @@ public final class GameScene: SKScene {
     
     private func apply(state: GameState) {
         let players = state.config.players
-        guard let opponent = players.first(where: { $0 != localPlayer }) else { return }
+        guard let opponent = players.first(where: { $0 != localPlayer }) else { return }    
+        
+        if !hasLoadedCardTextures {
+            Task {
+                await CardTextureStore.shared.preload(textureNames: state.config.decks.flatMap(\.value).compactMap( { $0 }).compactMap(\.artKey))
+                self.hasLoadedCardTextures = true
+            }
+        }
         
         handRenderer.renderBottomHand(state: state, player: localPlayer)
         handRenderer.renderOpponentHand(state: state, player: opponent)

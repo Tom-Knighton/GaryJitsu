@@ -13,6 +13,7 @@ public final class CardNode: SKNode {
     public var isInBottomTray: Bool = false
     public var isDealing: Bool = false
     
+    private var bgArt: SKSpriteNode
     private var frameArt: SKSpriteNode
     
     private var faceUp: Bool = true
@@ -46,6 +47,7 @@ public final class CardNode: SKNode {
         self.card = card
 
         frameArt = SKSpriteNode()
+        bgArt = SKSpriteNode()
         elementIcon = SKSpriteNode(texture: Self.icon(for: card))
         levelIcon = SKLabelNode()
         super.init()
@@ -58,6 +60,8 @@ public final class CardNode: SKNode {
     
     public func setFaceUp(_ value: Bool) {
         faceUp = value
+        
+        self.bgArt.isHidden = !faceUp
     }
     
     public func setSelected(_ value: Bool) {
@@ -81,6 +85,14 @@ public final class CardNode: SKNode {
     
     private func drawAndAddBaseNodes(for cardType: CardType) {
         if cardType.isFaceUp {
+            
+            if let art = card.artKey {
+                bgArt.texture = CardTextureStore.shared.art(for: art)
+                bgArt.anchorPoint = CGPoint(x: 0.5, y: 0.5)
+                bgArt.size = .init(width: cardType.size.width - 10, height: cardType.size.height - 10)
+                addChild(bgArt)
+            }
+            
             frameArt.texture = Self.template(for: card)
             frameArt.anchorPoint = CGPoint(x: 0.5, y: 0.5)
             frameArt.size = cardType.size

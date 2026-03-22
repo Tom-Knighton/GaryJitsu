@@ -9,7 +9,7 @@
       "element": "fire",
       "level": 3,
       "colour": "blue",
-      "artKey": null
+      "artKey": "card_1"
     },
     {
       "id": "card_2",
@@ -18,34 +18,34 @@
       "element": "fire",
       "level": 2,
       "colour": "green",
-      "artKey": null
+      "artKey": "card_2"
     },
     {
       "id": "card_3",
       "name": "Paw Punch Practice",
-      "description": "A line of eager students throw quick paw punches into training dummies. Some land perfectly, others tumble in excitement.",
+      "description": "The training dummies in the dojo courtyard have seen thousands of punches. Some strikes land perfectly. Others wobble the dummy sideways. But every punch brings a student one step closer to becoming a true GoJitsu fighter.",
       "element": "fire",
       "level": 8,
       "colour": "green",
-      "artKey": null
+      "artKey": "card_3"
     },
     {
       "id": "card_4",
       "name": "Quiet Meditation",
-      "description": "Even the most energetic karate dogs must learn patient. Sitting still and breating deeply is harder than any kick.",
+      "description": "Even the most energetic karate dogs must learn patience. Sitting still, breathing slowly, and calming the mind is sometimes the hardest lesson of all. Sensei says a quiet mind strikes faster than a busy one.",
       "element": "fire",
       "level": 3,
       "colour": "orange",
-      "artKey": null
+      "artKey": "card_4"
     },
     {
       "id": "card_5",
       "name": "Balance Training",
-      "description": "If you can stand steady on one paw, nothing can knock you over.",
+      "description": "Standing steady on one paw is no easy task, especially when the bamboo poles sway in the wind. But mastering balance means mastering your body, and that can make the difference in any match.",
       "element": "fire",
       "level": 4,
       "colour": "purple",
-      "artKey": null
+      "artKey": "card_5"
     },
     {
       "id": "card_6",
@@ -54,7 +54,7 @@
       "element": "fire",
       "level": 6,
       "colour": "purple",
-      "artKey": null
+      "artKey": "card_6"
     },
     {
       "id": "card_7",
@@ -63,7 +63,7 @@
       "element": "fire",
       "level": 2,
       "colour": "red",
-      "artKey": null
+      "artKey": "card_7"
     },
     {
       "id": "card_8",
@@ -72,7 +72,7 @@
       "element": "fire",
       "level": 7,
       "colour": "red",
-      "artKey": null
+      "artKey": "card_8"
     },
     {
       "id": "card_9",
@@ -81,7 +81,7 @@
       "element": "fire",
       "level": 2,
       "colour": "yellow",
-      "artKey": null
+      "artKey": "card_9"
     },
     {
       "id": "card_10",
@@ -90,7 +90,7 @@
       "element": "fire",
       "level": 5,
       "colour": "yellow",
-      "artKey": null
+      "artKey": "card_10"
     },
     {
       "id": "card_11",
@@ -99,7 +99,7 @@
       "element": "snow",
       "level": 3,
       "colour": "blue",
-      "artKey": null
+      "artKey": "card_11"
     },
     {
       "id": "card_12",
@@ -108,7 +108,7 @@
       "element": "snow",
       "level": 2,
       "colour": "green",
-      "artKey": null
+      "artKey": "card_12"
     },
     {
       "id": "card_13",
@@ -117,7 +117,7 @@
       "element": "water",
       "level": 5,
       "colour": "green",
-      "artKey": null
+      "artKey": "card_13"
     },
     {
       "id": "card_14",
@@ -126,7 +126,7 @@
       "element": "snow",
       "level": 3,
       "colour": "orange",
-      "artKey": null
+      "artKey": "card_14"
     },
     {
       "id": "card_15",
@@ -135,7 +135,7 @@
       "element": "snow",
       "level": 4,
       "colour": "purple",
-      "artKey": null
+      "artKey": "card_15"
     },
     {
       "id": "card_16",
@@ -144,7 +144,7 @@
       "element": "snow",
       "level": 8,
       "colour": "purple",
-      "artKey": null
+      "artKey": "card_16"
     },
     {
       "id": "card_17",
@@ -153,7 +153,7 @@
       "element": "snow",
       "level": 2,
       "colour": "red",
-      "artKey": null
+      "artKey": "card_17"
     },
     {
       "id": "card_18",
@@ -162,16 +162,16 @@
       "element": "snow",
       "level": 6,
       "colour": "red",
-      "artKey": null
+      "artKey": "card_18"
     },
     {
       "id": "card_19",
       "name": "Riverbank Arena",
       "description": "Matches beside the rushing river are exciting—but slippery footing means fighters must stay sharp. This is a place for those who want to push their limits.",
-      "element": "snow",
+      "element": "water",
       "level": 2,
       "colour": "yellow",
-      "artKey": null
+      "artKey": "card_19"
     },
     {
       "id": "card_20",
@@ -180,7 +180,7 @@
       "element": "snow",
       "level": 7,
       "colour": "yellow",
-      "artKey": null
+      "artKey": "card_20"
     },
     {
       "id": "card_21",
@@ -189,7 +189,7 @@
       "element": "snow",
       "level": 3,
       "colour": "blue",
-      "artKey": null
+      "artKey": "card_21"
     },
     {
       "id": "card_22",
@@ -198,7 +198,7 @@
       "element": "water",
       "level": 5,
       "colour": "blue",
-      "artKey": null
+      "artKey": "card_22"
     },
     {
       "id": "card_23",
@@ -207,7 +207,7 @@
       "element": "water",
       "level": 2,
       "colour": "green",
-      "artKey": null
+      "artKey": "card_23"
     },
     {
       "id": "card_24",
@@ -216,7 +216,7 @@
       "element": "water",
       "level": 8,
       "colour": "green",
-      "artKey": null
+      "artKey": "card_24"
     },
     {
       "id": "card_25",
@@ -225,7 +225,7 @@
       "element": "water",
       "level": 3,
       "colour": "orange",
-      "artKey": null
+      "artKey": "card_25"
     },
     {
       "id": "card_26",
@@ -234,7 +234,7 @@
       "element": "water",
       "level": 4,
       "colour": "purple",
-      "artKey": null
+      "artKey": "card_26"
     },
     {
       "id": "card_27",
@@ -243,7 +243,7 @@
       "element": "water",
       "level": 6,
       "colour": "purple",
-      "artKey": null
+      "artKey": "card_27"
     },
     {
       "id": "card_28",
@@ -252,7 +252,7 @@
       "element": "water",
       "level": 2,
       "colour": "red",
-      "artKey": null
+      "artKey": "card_28"
     },
     {
       "id": "card_29",
@@ -261,7 +261,7 @@
       "element": "water",
       "level": 7,
       "colour": "red",
-      "artKey": null
+      "artKey": "card_29"
     },
     {
       "id": "card_30",
@@ -270,7 +270,7 @@
       "element": "water",
       "level": 2,
       "colour": "yellow",
-      "artKey": null
+      "artKey": "card_30"
     },
     {
       "id": "card_31",
@@ -279,7 +279,7 @@
       "element": "fire",
       "level": 2,
       "colour": "blue",
-      "artKey": null
+      "artKey": "card_31"
     },
     {
       "id": "card_32",
@@ -288,7 +288,7 @@
       "element": "fire",
       "level": 5,
       "colour": "blue",
-      "artKey": null
+      "artKey": "card_32"
     },
     {
       "id": "card_33",
@@ -297,7 +297,7 @@
       "element": "fire",
       "level": 4,
       "colour": "green",
-      "artKey": null
+      "artKey": "card_33"
     },
     {
       "id": "card_34",
@@ -306,7 +306,7 @@
       "element": "fire",
       "level": 6,
       "colour": "orange",
-      "artKey": null
+      "artKey": "card_34"
     },
     {
       "id": "card_35",
@@ -315,7 +315,7 @@
       "element": "fire",
       "level": 3,
       "colour": "purple",
-      "artKey": null
+      "artKey": "card_35"
     },
     {
       "id": "card_36",
@@ -324,7 +324,7 @@
       "element": "fire",
       "level": 5,
       "colour": "red",
-      "artKey": null
+      "artKey": "card_36"
     },
     {
       "id": "card_37",
@@ -333,7 +333,7 @@
       "element": "fire",
       "level": 4,
       "colour": "yellow",
-      "artKey": null
+      "artKey": "card_37"
     },
     {
       "id": "card_38",
@@ -342,7 +342,7 @@
       "element": "snow",
       "level": 2,
       "colour": "blue",
-      "artKey": null
+      "artKey": "card_38"
     },
     {
       "id": "card_39",
@@ -351,7 +351,7 @@
       "element": "snow",
       "level": 5,
       "colour": "blue",
-      "artKey": null
+      "artKey": "card_39"
     },
     {
       "id": "card_40",
@@ -360,7 +360,7 @@
       "element": "snow",
       "level": 4,
       "colour": "green",
-      "artKey": null
+      "artKey": "card_40"
     },
     {
       "id": "card_41",
@@ -369,7 +369,7 @@
       "element": "snow",
       "level": 6,
       "colour": "orange",
-      "artKey": null
+      "artKey": "card_41"
     },
     {
       "id": "card_42",
@@ -378,7 +378,7 @@
       "element": "snow",
       "level": 3,
       "colour": "purple",
-      "artKey": null
+      "artKey": "card_42"
     },
     {
       "id": "card_43",
@@ -387,7 +387,7 @@
       "element": "snow",
       "level": 5,
       "colour": "red",
-      "artKey": null
+      "artKey": "card_43"
     },
     {
       "id": "card_44",
@@ -396,7 +396,7 @@
       "element": "snow",
       "level": 4,
       "colour": "yellow",
-      "artKey": null
+      "artKey": "card_44"
     },
     {
       "id": "card_45",
@@ -405,7 +405,7 @@
       "element": "water",
       "level": 2,
       "colour": "blue",
-      "artKey": null
+      "artKey": "card_45"
     },
     {
       "id": "card_46",
@@ -414,7 +414,7 @@
       "element": "water",
       "level": 4,
       "colour": "green",
-      "artKey": null
+      "artKey": "card_46"
     },
     {
       "id": "card_47",
@@ -423,7 +423,7 @@
       "element": "water",
       "level": 6,
       "colour": "orange",
-      "artKey": null
+      "artKey": "card_47"
     },
     {
       "id": "card_48",
@@ -432,7 +432,7 @@
       "element": "water",
       "level": 3,
       "colour": "purple",
-      "artKey": null
+      "artKey": "card_48"
     },
     {
       "id": "card_49",
@@ -441,7 +441,7 @@
       "element": "water",
       "level": 5,
       "colour": "red",
-      "artKey": null
+      "artKey": "card_49"
     },
     {
       "id": "card_50",
@@ -450,7 +450,7 @@
       "element": "water",
       "level": 5,
       "colour": "yellow",
-      "artKey": null
+      "artKey": "card_50"
     },
     {
       "id": "card_51",
@@ -459,7 +459,7 @@
       "element": "fire",
       "level": 6,
       "colour": "blue",
-      "artKey": null
+      "artKey": "card_51"
     },
     {
       "id": "card_52",
@@ -468,7 +468,7 @@
       "element": "water",
       "level": 5,
       "colour": "green",
-      "artKey": null
+      "artKey": "card_52"
     },
     {
       "id": "card_53",
@@ -477,7 +477,7 @@
       "element": "fire",
       "level": 4,
       "colour": "orange",
-      "artKey": null
+      "artKey": "card_53"
     },
     {
       "id": "card_54",
@@ -486,7 +486,7 @@
       "element": "fire",
       "level": 8,
       "colour": "purple",
-      "artKey": null
+      "artKey": "card_54"
     },
     {
       "id": "card_55",
@@ -495,7 +495,7 @@
       "element": "fire",
       "level": 3,
       "colour": "red",
-      "artKey": null
+      "artKey": "card_55"
     },
     {
       "id": "card_56",
@@ -504,7 +504,7 @@
       "element": "fire",
       "level": 7,
       "colour": "yellow",
-      "artKey": null
+      "artKey": "card_56"
     },
     {
       "id": "card_57",
@@ -513,7 +513,7 @@
       "element": "snow",
       "level": 6,
       "colour": "blue",
-      "artKey": null
+      "artKey": "card_57"
     },
     {
       "id": "card_58",
@@ -522,7 +522,7 @@
       "element": "snow",
       "level": 7,
       "colour": "green",
-      "artKey": null
+      "artKey": "card_58"
     },
     {
       "id": "card_59",
@@ -531,7 +531,7 @@
       "element": "fire",
       "level": 4,
       "colour": "orange",
-      "artKey": null
+      "artKey": "card_59"
     },
     {
       "id": "card_60",
@@ -540,7 +540,7 @@
       "element": "snow",
       "level": 8,
       "colour": "orange",
-      "artKey": null
+      "artKey": "card_60"
     },
     {
       "id": "card_61",
@@ -549,7 +549,7 @@
       "element": "snow",
       "level": 6,
       "colour": "purple",
-      "artKey": null
+      "artKey": "card_61"
     },
     {
       "id": "card_62",
@@ -558,7 +558,7 @@
       "element": "snow",
       "level": 3,
       "colour": "red",
-      "artKey": null
+      "artKey": "card_62"
     },
     {
       "id": "card_63",
@@ -567,7 +567,7 @@
       "element": "snow",
       "level": 5,
       "colour": "yellow",
-      "artKey": null
+      "artKey": "card_63"
     },
     {
       "id": "card_64",
@@ -576,7 +576,7 @@
       "element": "water",
       "level": 6,
       "colour": "blue",
-      "artKey": null
+      "artKey": "card_64"
     },
     {
       "id": "card_65",
@@ -585,7 +585,7 @@
       "element": "water",
       "level": 5,
       "colour": "green",
-      "artKey": null
+      "artKey": "card_65"
     },
     {
       "id": "card_66",
@@ -594,7 +594,7 @@
       "element": "water",
       "level": 4,
       "colour": "orange",
-      "artKey": null
+      "artKey": "card_66"
     },
     {
       "id": "card_67",
@@ -603,7 +603,7 @@
       "element": "water",
       "level": 8,
       "colour": "purple",
-      "artKey": null
+      "artKey": "card_67"
     },
     {
       "id": "card_68",
@@ -612,7 +612,7 @@
       "element": "water",
       "level": 3,
       "colour": "red",
-      "artKey": null
+      "artKey": "card_69"
     },
     {
       "id": "card_69",
@@ -621,7 +621,7 @@
       "element": "water",
       "level": 4,
       "colour": "yellow",
-      "artKey": null
+      "artKey": "card_69"
     },
     {
       "id": "card_70",
@@ -630,7 +630,7 @@
       "element": "water",
       "level": 7,
       "colour": "yellow",
-      "artKey": null
+      "artKey": "card_70"
     }
   ]
 }
